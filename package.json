@@ -1,0 +1,26 @@
+{
+  "name": "programming1bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/opus": "^0.5.3",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "@discordjs/voice": "^0.6.0",
+    "discord-api-types": "^0.23.1",
+    "discord.js": "^13.2.0",
+    "distube": "^3.0.0-beta.39",
+    "dotenv": "^10.0.0",
+    "install": "^0.13.0",
+    "npm": "^8.0.0",
+    "typescript": "^4.4.3"
+  }
+}
