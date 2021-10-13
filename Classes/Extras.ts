@@ -9,7 +9,7 @@ require("dotenv").config();
 export async function createCommands(guild: Guild): Promise<Boolean> {
     const cmd = commands.map(command => command.createCommand())
 
-    const botID = "ODk1ODUzNjQyMjQwODkyOTI4.YV-muA.-XodcM79fGpK4EJY0SRmPHyUi4s";
+    const botID = process.env.BOT
     const CLIENT_ID = client.user.id;
     const rest = new REST({
         version: '9'

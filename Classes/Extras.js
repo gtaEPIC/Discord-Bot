@@ -49,7 +49,7 @@ function createCommands(guild) {
             switch (_a.label) {
                 case 0:
                     cmd = InteractionCreated_1.commands.map(function (command) { return command.createCommand(); });
-                    botID = "ODk1ODUzNjQyMjQwODkyOTI4.YV-muA.-XodcM79fGpK4EJY0SRmPHyUi4s";
+                    botID = process.env.BOT;
                     CLIENT_ID = index_1.client.user.id;
                     rest = new rest_1.REST({
                         version: '9'
