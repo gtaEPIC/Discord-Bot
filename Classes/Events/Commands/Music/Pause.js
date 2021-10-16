@@ -50,10 +50,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var Commands_1 = require("../Commands");
 var builders_1 = require("@discordjs/builders");
 var Extras_1 = require("../../../Extras");
+var index_1 = require("../../../../index");
 var Pause = /** @class */ (function (_super) {
     __extends(Pause, _super);
     function Pause() {
@@ -63,15 +64,16 @@ var Pause = /** @class */ (function (_super) {
     }
     Pause.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var queue;
+            var member, queue;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkVCAndQueue)(interaction)];
+                    case 0: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
                     case 1:
-                        queue = _a.sent();
-                        if (!queue)
+                        if (_a.sent())
                             return [2 /*return*/];
-                        queue.setPaused(true);
+                        member = interaction.member;
+                        queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
+                        queue.pause();
                         return [4 /*yield*/, interaction.reply("⏸ | Music Paused")];
                     case 2:
                         _a.sent();
@@ -86,5 +88,6 @@ var Pause = /** @class */ (function (_super) {
             .setDescription("Pauses the current song being played. Use /resume to continue the song");
     };
     return Pause;
-}(Commands_1.default));
-exports.default = Pause;
+}(Commands_1["default"]));
+exports["default"] = Pause;
+//# sourceMappingURL=Pause.js.map

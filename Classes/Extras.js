@@ -35,8 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkVCAndQueue = exports.getQueue = exports.fullCheck = exports.vcCheck = exports.createCommands = void 0;
+exports.__esModule = true;
+exports.secondsToTime = exports.timeToSeconds = exports.toDoubleDigits = exports.checkVC = exports.fullCheck = exports.vcCheck = exports.createCommands = void 0;
 var rest_1 = require("@discordjs/rest");
 var v9_1 = require("discord-api-types/v9");
 var index_1 = require("../index");
@@ -111,7 +111,9 @@ function vcCheck(myVC, userVC, interaction) {
                 case 7:
                     _a.sent();
                     return [2 /*return*/, true];
-                case 8: return [2 /*return*/, false];
+                case 8: 
+                //console.log("No Vc Check")
+                return [2 /*return*/, false];
             }
         });
     });
@@ -140,25 +142,17 @@ function fullCheck(interaction, member) {
                 case 4:
                     _a.sent();
                     return [2 /*return*/, true];
-                case 5: return [2 /*return*/, false];
+                case 5: 
+                //console.log("All Good Check")
+                return [2 /*return*/, false];
             }
         });
     });
 }
 exports.fullCheck = fullCheck;
-function getQueue(guild, channel) {
-    return index_1.player.createQueue(guild, {
-        metadata: {
-            channel: channel
-        },
-        leaveOnEnd: false,
-        leaveOnEmpty: false
-    });
-}
-exports.getQueue = getQueue;
-function checkVCAndQueue(interaction) {
+function checkVC(interaction) {
     return __awaiter(this, void 0, void 0, function () {
-        var member, e_2, queue, channel, e_3;
+        var member, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -172,24 +166,37 @@ function checkVCAndQueue(interaction) {
                     _a.sent();
                     return [2 /*return*/];
                 case 3: return [4 /*yield*/, fullCheck(interaction, member)];
-                case 4:
-                    _a.sent();
-                    channel = interaction.channel;
-                    _a.label = 5;
-                case 5:
-                    _a.trys.push([5, 6, , 8]);
-                    queue = getQueue(interaction.guild, channel);
-                    return [3 /*break*/, 8];
-                case 6:
-                    e_3 = _a.sent();
-                    console.log(e_3);
-                    return [4 /*yield*/, interaction.reply({ content: "Whoops, an error occurred. (E5003)", ephemeral: true })];
-                case 7:
-                    _a.sent();
-                    return [2 /*return*/];
-                case 8: return [2 /*return*/, queue];
+                case 4: return [2 /*return*/, _a.sent()];
             }
         });
     });
 }
-exports.checkVCAndQueue = checkVCAndQueue;
+exports.checkVC = checkVC;
+/**
+ * Converts a number to double digits in a String
+ * @param number The number to be formatted
+ */
+function toDoubleDigits(number) {
+    if (number < 10) {
+        return "0" + number;
+    }
+    else {
+        return number.toString();
+    }
+}
+exports.toDoubleDigits = toDoubleDigits;
+function timeToSeconds(time) {
+    var mins = time.split(":")[0];
+    var secs = time.split(":")[1];
+    var seconds = parseInt(secs);
+    seconds += parseInt(mins) * 60;
+    return seconds;
+}
+exports.timeToSeconds = timeToSeconds;
+function secondsToTime(seconds) {
+    var mins = Math.floor(seconds / 60);
+    seconds -= mins * 60;
+    return mins + ":" + toDoubleDigits(seconds);
+}
+exports.secondsToTime = secondsToTime;
+//# sourceMappingURL=Extras.js.map

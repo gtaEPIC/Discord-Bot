@@ -3,7 +3,6 @@ import { REST } from "@discordjs/rest";
 import {APIInteractionGuildMember, Routes} from "discord-api-types/v9";
 import {client, player} from "../index";
 import {commands} from "./Events/InteractionCreated";
-import {Queue} from "discord-player";
 require("dotenv").config();
 
 export async function createCommands(guild: Guild): Promise<Boolean> {
@@ -57,6 +56,7 @@ export async function vcCheck(myVC, userVC, interaction: CommandInteraction): Pr
             return true;
         }
     }
+    //console.log("No Vc Check")
     return false;
 }
 
@@ -70,20 +70,11 @@ export async function fullCheck(interaction: CommandInteraction, member: GuildMe
         await interaction.reply({content: "Whoops, an error occurred. (E5002)", ephemeral: true});
         return true;
     }
+    //console.log("All Good Check")
     return false;
 }
 
-export function getQueue(guild: Guild, channel: TextChannel): Queue {
-    return player.createQueue(guild, {
-        metadata: {
-            channel: channel
-        },
-        leaveOnEnd: false,
-        leaveOnEmpty: false
-    });
-}
-
-export async function checkVCAndQueue(interaction: CommandInteraction): Promise<Queue> {
+export async function checkVC(interaction: CommandInteraction): Promise<boolean> {
     let member: GuildMember;
     try {
         member = <GuildMember>interaction.member;
@@ -91,15 +82,30 @@ export async function checkVCAndQueue(interaction: CommandInteraction): Promise<
         await interaction.reply({content: "Whoops, an error Occurred. (E5001)", ephemeral: true});
         return;
     }
-    await fullCheck(interaction, member);
-    let queue: Queue;
-    let channel: TextChannel = <TextChannel>interaction.channel;
-    try {
-        queue = getQueue(interaction.guild, channel)
-    } catch (e) {
-        console.log(e);
-        await interaction.reply({content: "Whoops, an error occurred. (E5003)", ephemeral: true});
-        return;
+    return await fullCheck(interaction, member);
+}
+
+/**
+ * Converts a number to double digits in a String
+ * @param number The number to be formatted
+ */
+export function toDoubleDigits(number: number) {
+    if (number < 10) {
+        return "0" + number;
+    }else{
+        return number.toString();
     }
-    return queue;
+}
+
+export function timeToSeconds(time: string): number {
+    let mins = time.split(":")[0];
+    let secs = time.split(":")[1];
+    let seconds = parseInt(secs);
+    seconds += parseInt(mins) * 60;
+    return seconds;
+}
+export function secondsToTime(seconds: number): string {
+    let mins = Math.floor(seconds / 60);
+    seconds -= mins * 60
+    return mins + ":" + toDoubleDigits(seconds);
 }

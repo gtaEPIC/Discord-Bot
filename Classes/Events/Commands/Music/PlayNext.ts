@@ -1,33 +1,33 @@
 import Commands from "../Commands";
-import {CommandInteraction, Message} from "discord.js";
+import {CommandInteraction, GuildMember, Message, TextChannel} from "discord.js";
 import {SlashCommandBuilder, SlashCommandStringOption} from "@discordjs/builders";
-import {Queue} from "Distube";
+
 import {player} from "../../../../index";
 import Play from "./Play";
 import {APIMessage} from "discord-api-types";
-import {checkVCAndQueue} from "../../../Extras";
+import {checkVC} from "../../../Extras";
+import Queue from "../../../Music/Queue";
+import Track from "../../../Music/Track";
 
 export default class PlayNext extends Commands {
 
     commandName: string = "play-next";
 
     async execute(interaction: CommandInteraction, args) {
-        const queue: Queue = await checkVCAndQueue(interaction);
-        if (!queue) return;
+        if (await checkVC(interaction)) return;
+        let member: GuildMember = <GuildMember>interaction.member
+        let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
         if (!queue.connection) await new Play().execute(interaction, args);
         else {
-            let replied: Message | APIMessage = await interaction.reply({
+            let replied: Message = <Message>(await interaction.reply({
                 content: "🔍 | Searching for song",
                 fetchReply: true
-            })
-            if (!(replied instanceof Message) || replied.partial) return;
+            }))
             const query = args["query"];
-            const track = await player.search(query, {
-                requestedBy: interaction.user
-            }).then(x => x.tracks[0]);
-            if (!track) return await replied.edit({ content: `❌ | Track **${query}** not found!` });
-            queue.insert(track)
-            await replied.edit(`⏱ | Queued track **${track.title}**! It will be played next`)
+            const results: Track = await queue.search(query, member);
+            if (!results) return await replied.edit({ content: `❌ | Track **${query}** not found!` });
+            queue.addTrack(results, 1);
+            await replied.edit(`⏱ | Queued track **${results.name}**! It will be played next`)
         }
     }
 

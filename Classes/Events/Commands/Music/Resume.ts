@@ -1,17 +1,19 @@
 import Commands from "../Commands";
-import {CommandInteraction} from "discord.js";
-import {Queue} from "Distube";
+import {CommandInteraction, GuildMember, TextChannel} from "discord.js";
 import {SlashCommandBuilder} from "@discordjs/builders";
-import {checkVCAndQueue} from "../../../Extras";
+import {checkVC} from "../../../Extras";
+import {player} from "../../../../index";
+import Queue from "../../../Music/Queue";
 
 export default class Resume extends Commands {
 
     commandName: string = "resume";
 
     async execute(interaction: CommandInteraction, args) {
-        const queue: Queue = await checkVCAndQueue(interaction);
-        if (!queue) return;
-        queue.setPaused(false);
+        if (await checkVC(interaction)) return;
+        let member: GuildMember = <GuildMember>interaction.member
+        let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
+        queue.resume();
         await interaction.reply("▶ | Music Resumed")
     }
 

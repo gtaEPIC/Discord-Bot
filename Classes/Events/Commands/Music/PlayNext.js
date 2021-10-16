@@ -50,9 +50,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var Commands_1 = require("../Commands");
-var discord_js_1 = require("discord.js");
 var builders_1 = require("@discordjs/builders");
 var index_1 = require("../../../../index");
 var Play_1 = require("./Play");
@@ -66,16 +65,17 @@ var PlayNext = /** @class */ (function (_super) {
     }
     PlayNext.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var queue, replied, query, track;
+            var member, queue, replied, query, results;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkVCAndQueue)(interaction)];
+                    case 0: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
                     case 1:
-                        queue = _a.sent();
-                        if (!queue)
+                        if (_a.sent())
                             return [2 /*return*/];
+                        member = interaction.member;
+                        queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
                         if (!!queue.connection) return [3 /*break*/, 3];
-                        return [4 /*yield*/, new Play_1.default().execute(interaction, args)];
+                        return [4 /*yield*/, new Play_1["default"]().execute(interaction, args)];
                     case 2:
                         _a.sent();
                         return [3 /*break*/, 9];
@@ -84,21 +84,17 @@ var PlayNext = /** @class */ (function (_super) {
                             fetchReply: true
                         })];
                     case 4:
-                        replied = _a.sent();
-                        if (!(replied instanceof discord_js_1.Message) || replied.partial)
-                            return [2 /*return*/];
+                        replied = (_a.sent());
                         query = args["query"];
-                        return [4 /*yield*/, index_1.player.search(query, {
-                                requestedBy: interaction.user
-                            }).then(function (x) { return x.tracks[0]; })];
+                        return [4 /*yield*/, queue.search(query, member)];
                     case 5:
-                        track = _a.sent();
-                        if (!!track) return [3 /*break*/, 7];
+                        results = _a.sent();
+                        if (!!results) return [3 /*break*/, 7];
                         return [4 /*yield*/, replied.edit({ content: "\u274C | Track **" + query + "** not found!" })];
                     case 6: return [2 /*return*/, _a.sent()];
                     case 7:
-                        queue.insert(track);
-                        return [4 /*yield*/, replied.edit("\u23F1 | Queued track **" + track.title + "**! It will be played next")];
+                        queue.addTrack(results, 1);
+                        return [4 /*yield*/, replied.edit("\u23F1 | Queued track **" + results.name + "**! It will be played next")];
                     case 8:
                         _a.sent();
                         _a.label = 9;
@@ -117,5 +113,6 @@ var PlayNext = /** @class */ (function (_super) {
             .setRequired(true));
     };
     return PlayNext;
-}(Commands_1.default));
-exports.default = PlayNext;
+}(Commands_1["default"]));
+exports["default"] = PlayNext;
+//# sourceMappingURL=PlayNext.js.map

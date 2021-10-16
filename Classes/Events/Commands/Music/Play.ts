@@ -1,17 +1,14 @@
 import Commands from "../Commands";
-import {CommandInteraction, GuildMember, Message} from "discord.js";
-import {APIMessage} from "discord-api-types";
+import {CommandInteraction, GuildMember, Message, TextChannel} from "discord.js";
 import {player} from "../../../../index";
-import Song, {Queue} from "distube";
 import {SlashCommandBuilder, SlashCommandStringOption} from "@discordjs/builders";
-import {checkVCAndQueue} from "../../../Extras";
-import SearchResult from "distube";
-import DisTube from "distube";
+import {checkVC} from "../../../Extras";
+import Queue from "../../../Music/Queue";
+import Track from "../../../Music/Track";
 
 export default class Play extends Commands {
     async execute(interaction: CommandInteraction, args) {
-        const queue: Queue = await checkVCAndQueue(interaction);
-        if (!queue) return;
+        if (await checkVC(interaction)) return;
         let member: GuildMember;
         try {
             member = <GuildMember>interaction.member;
@@ -19,28 +16,28 @@ export default class Play extends Commands {
             await interaction.reply({content: "Whoops, an error Occurred. (E5001)", ephemeral: true});
             return;
         }
-        let replied: Message | APIMessage = await interaction.reply({content: "🔈 | Attempting to join channel", fetchReply: true})
-        if (!(replied instanceof Message) || replied.partial) return;
+        let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel);
+        let replied: Message = <Message>(await interaction.reply({content: "🔍 | Searching for song", fetchReply: true}))
+        const query = args["query"];
+        const results: Track = await queue.search(query,member);
+        if (!results) return await replied.edit({ content: `❌ | Track **${query}** not found!` });
         try {
-            if (!queue.voice.connection) await queue.voice.join(member.voice.channel);
+            if (!queue.connection) {
+                await replied.edit("🔈 | Attempting to join channel")
+                await queue.connect()
+            }
         } catch (e) {
             console.log(e);
+            await replied.edit({ content: "❌ | An error occurred while attempting to join!" });
             queue.delete()
-            return await replied.edit({ content: "❌ | An error occurred while attempting to join!" });
+            return
         }
-        const query = args["query"];
-        await replied.edit("🔍 | Searching for song")
-        const track: Array<SearchResult> = (await player.search(query));
-        if (!track) return await replied.edit({ content: `❌ | Track **${query}** not found!` });
 
-        const playlist = track.playlist;
+        queue.play(results);
 
-        playlist ? queue.addTracks(playlist.tracks) : queue.addTrack(track);
-        if (!queue.playing) await queue.play();
+        //if (!queue.playing || !queue.paused) await queue.resume();
 
-        //await queue.play(track);
-
-        return await replied.edit({ content: `⏱ | Queued track **${track.title}**!` });
+        return await replied.edit({ content: `⏱ | Queued track **${results.name}**!` });
     }
 
     createCommand(): object {

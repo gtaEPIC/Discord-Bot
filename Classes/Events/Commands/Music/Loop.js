@@ -50,10 +50,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var Commands_1 = require("../Commands");
 var builders_1 = require("@discordjs/builders");
 var Extras_1 = require("../../../Extras");
+var index_1 = require("../../../../index");
+var Queue_1 = require("../../../Music/Queue");
 var Loop = /** @class */ (function (_super) {
     __extends(Loop, _super);
     function Loop() {
@@ -63,14 +65,15 @@ var Loop = /** @class */ (function (_super) {
     }
     Loop.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var queue, mode, response, _a;
+            var member, queue, mode, response, _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkVCAndQueue)(interaction)];
+                    case 0: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
                     case 1:
-                        queue = _b.sent();
-                        if (!queue)
+                        if (_b.sent())
                             return [2 /*return*/];
+                        member = interaction.member;
+                        queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
                         _a = args.state;
                         switch (_a) {
                             case "off": return [3 /*break*/, 2];
@@ -79,15 +82,15 @@ var Loop = /** @class */ (function (_super) {
                         }
                         return [3 /*break*/, 5];
                     case 2:
-                        mode = QueueRepeatMode.OFF;
+                        mode = Queue_1.LoopModes.OFF;
                         response = "Loop Disabled";
                         return [3 /*break*/, 7];
                     case 3:
-                        mode = QueueRepeatMode.TRACK;
+                        mode = Queue_1.LoopModes.TRACK;
                         response = "🔂 | Track Loop Enabled";
                         return [3 /*break*/, 7];
                     case 4:
-                        mode = QueueRepeatMode.QUEUE;
+                        mode = Queue_1.LoopModes.QUEUE;
                         response = "🔁 | Queue Loop Enabled";
                         return [3 /*break*/, 7];
                     case 5: return [4 /*yield*/, interaction.reply({ content: "An Error Occurred. (E4001)", ephemeral: true })];
@@ -95,7 +98,7 @@ var Loop = /** @class */ (function (_super) {
                         _b.sent();
                         return [2 /*return*/];
                     case 7:
-                        queue.setRepeatMode(mode);
+                        queue.loop = mode;
                         return [4 /*yield*/, interaction.reply(response)];
                     case 8:
                         _b.sent();
@@ -113,8 +116,10 @@ var Loop = /** @class */ (function (_super) {
             .setDescription("The state the loop should be in")
             .addChoice("Off", "off")
             .addChoice("Loop Song", "loop1")
-            .addChoice("Loop Queue", "loopQ"));
+            .addChoice("Loop Queue", "loopQ")
+            .setRequired(true));
     };
     return Loop;
-}(Commands_1.default));
-exports.default = Loop;
+}(Commands_1["default"]));
+exports["default"] = Loop;
+//# sourceMappingURL=Loop.js.map

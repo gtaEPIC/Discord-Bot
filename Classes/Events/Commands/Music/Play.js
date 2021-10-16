@@ -50,9 +50,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var Commands_1 = require("../Commands");
-var discord_js_1 = require("discord.js");
 var index_1 = require("../../../../index");
 var builders_1 = require("@discordjs/builders");
 var Extras_1 = require("../../../Extras");
@@ -65,13 +64,12 @@ var Play = /** @class */ (function (_super) {
     }
     Play.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var queue, member, e_1, replied, e_2, query, track, playlist;
+            var member, e_1, queue, replied, query, results, e_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkVCAndQueue)(interaction)];
+                    case 0: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
                     case 1:
-                        queue = _a.sent();
-                        if (!queue)
+                        if (_a.sent())
                             return [2 /*return*/];
                         _a.label = 2;
                     case 2:
@@ -84,48 +82,42 @@ var Play = /** @class */ (function (_super) {
                     case 4:
                         _a.sent();
                         return [2 /*return*/];
-                    case 5: return [4 /*yield*/, interaction.reply({ content: "🔈 | Attempting to join channel", fetchReply: true })];
+                    case 5:
+                        queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
+                        return [4 /*yield*/, interaction.reply({ content: "🔍 | Searching for song", fetchReply: true })];
                     case 6:
-                        replied = _a.sent();
-                        if (!(replied instanceof discord_js_1.Message) || replied.partial)
-                            return [2 /*return*/];
-                        _a.label = 7;
+                        replied = (_a.sent());
+                        query = args["query"];
+                        return [4 /*yield*/, queue.search(query, member)];
                     case 7:
-                        _a.trys.push([7, 10, , 12]);
-                        if (!!queue.voice.connection) return [3 /*break*/, 9];
-                        return [4 /*yield*/, queue.voice.join(member.voice.channel)];
-                    case 8:
-                        _a.sent();
-                        _a.label = 9;
-                    case 9: return [3 /*break*/, 12];
+                        results = _a.sent();
+                        if (!!results) return [3 /*break*/, 9];
+                        return [4 /*yield*/, replied.edit({ content: "\u274C | Track **" + query + "** not found!" })];
+                    case 8: return [2 /*return*/, _a.sent()];
+                    case 9:
+                        _a.trys.push([9, 13, , 15]);
+                        if (!!queue.connection) return [3 /*break*/, 12];
+                        return [4 /*yield*/, replied.edit("🔈 | Attempting to join channel")];
                     case 10:
+                        _a.sent();
+                        return [4 /*yield*/, queue.connect()];
+                    case 11:
+                        _a.sent();
+                        _a.label = 12;
+                    case 12: return [3 /*break*/, 15];
+                    case 13:
                         e_2 = _a.sent();
                         console.log(e_2);
-                        queue.delete();
                         return [4 /*yield*/, replied.edit({ content: "❌ | An error occurred while attempting to join!" })];
-                    case 11: return [2 /*return*/, _a.sent()];
-                    case 12:
-                        query = args["query"];
-                        return [4 /*yield*/, replied.edit("🔍 | Searching for song")];
-                    case 13:
-                        _a.sent();
-                        return [4 /*yield*/, index_1.player.search(query)];
                     case 14:
-                        track = (_a.sent());
-                        if (!!track) return [3 /*break*/, 16];
-                        return [4 /*yield*/, replied.edit({ content: "\u274C | Track **" + query + "** not found!" })];
-                    case 15: return [2 /*return*/, _a.sent()];
-                    case 16:
-                        playlist = track.playlist;
-                        playlist ? queue.addTracks(playlist.tracks) : queue.addTrack(track);
-                        if (!!queue.playing) return [3 /*break*/, 18];
-                        return [4 /*yield*/, queue.play()];
-                    case 17:
                         _a.sent();
-                        _a.label = 18;
-                    case 18: return [4 /*yield*/, replied.edit({ content: "\u23F1 | Queued track **" + track.title + "**!" })];
-                    case 19: 
-                    //await queue.play(track);
+                        queue["delete"]();
+                        return [2 /*return*/];
+                    case 15:
+                        queue.play(results);
+                        return [4 /*yield*/, replied.edit({ content: "\u23F1 | Queued track **" + results.name + "**!" })];
+                    case 16: 
+                    //if (!queue.playing || !queue.paused) await queue.resume();
                     return [2 /*return*/, _a.sent()];
                 }
             });
@@ -139,5 +131,6 @@ var Play = /** @class */ (function (_super) {
             .toJSON();
     };
     return Play;
-}(Commands_1.default));
-exports.default = Play;
+}(Commands_1["default"]));
+exports["default"] = Play;
+//# sourceMappingURL=Play.js.map

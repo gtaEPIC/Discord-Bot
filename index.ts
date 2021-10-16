@@ -1,9 +1,12 @@
-import { Client, Intents } from "discord.js";
+import {Client, Intents, MessageActionRow, MessageButton} from "discord.js";
 import OnReady from "./Classes/Events/OnReady";
-require("dotenv").config();
 import GuildCreate from "./Classes/Events/GuildCreate";
 import InteractionCreated from "./Classes/Events/InteractionCreated";
-import {DisTube} from "distube";
+import Player from "./Classes/Music/Player";
+import {MessageButtonStyles} from "discord.js/typings/enums";
+
+require("dotenv").config();
+
 
 export const client = new Client({
     intents: [
@@ -13,26 +16,33 @@ export const client = new Client({
     ]
 })
 
-export const player = new DisTube(client, {
+/*
+{
     searchSongs: 1,
     searchCooldown: 30,
     leaveOnEmpty: false,
     emptyCooldown: 0,
     leaveOnFinish: false,
     leaveOnStop: true,
-})
-
-function timeToSeconds(time: string): number {
-    let mins = time.split(":")[0];
-    let secs = time.split(":")[1];
-    let seconds = parseInt(secs);
-    seconds += parseInt(mins) * 60;
-    return seconds;
 }
+ */
 
-player.on("playSong", (queue, track) => {
-    queue.textChannel.send(`🎶 | Now playing **${track.name}**!`).then();
+export const player = new Player(client)
+
+
+
+player.on("onStart", (queue, track) => {
+    track.makeAnnouncement().then();
+    track.updater = setInterval(() => track.makeAnnouncement().then(),2000, queue)
 })
+player.on("onEmpty", queue => {
+    queue.textChannel.send("🕳️ | Queue is empty. Use `/play` to add another song").then();
+})
+/*
+setInterval(() => {
+    console.log(player.queues.get("697124957834051585")?.getTime();
+}, 2000);
+ */
 
 client.on("ready", OnReady);
 

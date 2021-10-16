@@ -1,36 +1,38 @@
 import Commands from "../Commands";
-import {CommandInteraction} from "discord.js";
-import {Queue} from "Distube";
+import {CommandInteraction, GuildMember, TextChannel} from "discord.js";
 import {SlashCommandBuilder, SlashCommandStringOption} from "@discordjs/builders";
-import {checkVCAndQueue} from "../../../Extras";
+import {checkVC} from "../../../Extras";
+import {player} from "../../../../index";
+import Queue, {LoopModes} from "../../../Music/Queue";
 
 export default class Loop extends Commands {
 
     commandName: string = "loop";
 
     async execute(interaction: CommandInteraction, args) {
-        const queue: Queue = await checkVCAndQueue(interaction);
-        if (!queue) return;
-        let mode: QueueRepeatMode;
+        if (await checkVC(interaction)) return;
+        let member: GuildMember = <GuildMember>interaction.member
+        let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
+        let mode: LoopModes;
         let response: string;
         switch (args.state) {
             case "off":
-                mode = QueueRepeatMode.OFF;
+                mode = LoopModes.OFF;
                 response = "Loop Disabled"
                 break;
             case "loop1":
-                mode = QueueRepeatMode.TRACK;
+                mode = LoopModes.TRACK;
                 response = "🔂 | Track Loop Enabled"
                 break;
             case "loopQ":
-                mode = QueueRepeatMode.QUEUE;
+                mode = LoopModes.QUEUE;
                 response = "🔁 | Queue Loop Enabled"
                 break;
             default:
                 await interaction.reply({content: "An Error Occurred. (E4001)", ephemeral: true});
                 return;
         }
-        queue.setRepeatMode(mode)
+        queue.loop = mode;
         await interaction.reply(response)
     }
 
@@ -44,6 +46,7 @@ export default class Loop extends Commands {
                 .addChoice("Off", "off")
                 .addChoice("Loop Song", "loop1")
                 .addChoice("Loop Queue", "loopQ")
+                .setRequired(true)
             )
     }
 }

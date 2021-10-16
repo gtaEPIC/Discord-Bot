@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var Extras_1 = require("../Extras");
 function default_1(guild) {
     return __awaiter(this, void 0, void 0, function () {
@@ -49,4 +49,5 @@ function default_1(guild) {
         });
     });
 }
-exports.default = default_1;
+exports["default"] = default_1;
+//# sourceMappingURL=GuildCreate.js.map

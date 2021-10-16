@@ -1,8 +1,9 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var Commands = /** @class */ (function () {
     function Commands() {
     }
     return Commands;
 }());
-exports.default = Commands;
+exports["default"] = Commands;
+//# sourceMappingURL=Commands.js.map
