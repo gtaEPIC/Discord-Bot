@@ -17,7 +17,7 @@ export default class PlayNext extends Commands {
         if (await checkVC(interaction)) return;
         let member: GuildMember = <GuildMember>interaction.member
         let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
-        if (!queue.connection) await new Play().execute(interaction, args);
+        if (!queue.connection || !queue.playing) await new Play().execute(interaction, args);
         else {
             let replied: Message = <Message>(await interaction.reply({
                 content: "🔍 | Searching for song",

@@ -74,7 +74,7 @@ var PlayNext = /** @class */ (function (_super) {
                             return [2 /*return*/];
                         member = interaction.member;
                         queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
-                        if (!!queue.connection) return [3 /*break*/, 3];
+                        if (!(!queue.connection || !queue.playing)) return [3 /*break*/, 3];
                         return [4 /*yield*/, new Play_1["default"]().execute(interaction, args)];
                     case 2:
                         _a.sent();

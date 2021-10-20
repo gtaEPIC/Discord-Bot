@@ -56,7 +56,7 @@ var Track = /** @class */ (function () {
         this.source = source;
         this.resource = (0, voice_1.createAudioResource)(this.source);
         this.source.addListener("close", function () { return console.log("YTDL Closed"); });
-        this.source.addListener("error", function (err) { return console.log("YTDL ERROR:", err); });
+        this.source.addListener("error", function (err) { return console.error("YTDL ERROR:", err); });
         this.source.addListener("error", (function (err) { return onError(err); }));
         this.source.addListener("pause", function () { return console.log("YTDL Paused"); });
         this.source.addListener("data", function () { return console.log("YTDL Data"); });
@@ -173,6 +173,12 @@ var Track = /** @class */ (function () {
             });
         });
     };
+    Track.prototype.onEnd = function () {
+        var _a;
+        (_a = this.announcement) === null || _a === void 0 ? void 0 : _a["delete"]().then();
+        this.announcement = undefined;
+        clearInterval(this.updater);
+    };
     Track.prototype.play = function (point) {
         return __awaiter(this, void 0, void 0, function () {
             var _a;
@@ -184,8 +190,9 @@ var Track = /** @class */ (function () {
                         _a = this.initSource;
                         return [4 /*yield*/, ytdl(this.url, {
                                 filter: "audio",
-                                quality: "lowest",
-                                begin: point
+                                quality: "lowestaudio",
+                                begin: point,
+                                highWaterMark: 1 << 25
                             })];
                     case 1:
                         _a.apply(this, [_b.sent(), function (err1) { return _this.error(err1); }]);
@@ -194,7 +201,7 @@ var Track = /** @class */ (function () {
                                 debug: true
                             })).player;
                             this.queue.createStateCheck();
-                            this.queue.audioPlayer.on("error", function (error) { return console.log("AUDIO PLAYER ERROR:", error); });
+                            this.queue.audioPlayer.on("error", function (error) { return console.error("AUDIO PLAYER ERROR:", error); });
                         }
                         this.queue.audioPlayer.play(this.resource);
                         return [2 /*return*/];
@@ -211,7 +218,8 @@ var Track = /** @class */ (function () {
                         if (this.lastError >= Math.floor(Date.now() / 1000) - 5)
                             return [2 /*return*/];
                         this.lastError = Math.floor(Date.now() / 1000);
-                        console.log(this);
+                        console.error("Track ERROR was thrown:", err);
+                        console.log("Track:", this);
                         point = this.resource.playbackDuration - 1000;
                         if (point < 0)
                             point = 0;
@@ -239,7 +247,7 @@ var Track = /** @class */ (function () {
                         return [4 /*yield*/, this.queue.textChannel.send(contents)];
                     case 1:
                         _a.sent();
-                        this.queue.onEnd(this).then();
+                        this.queue.onEnd().then();
                         return [3 /*break*/, 6];
                     case 2:
                         _a.trys.push([2, 4, , 6]);

@@ -85,6 +85,8 @@ function default_1(interaction) {
                 selectMenu.execute(interaction);
         }
     }
+    else if (interaction.isContextMenu()) {
+    }
 }
 exports["default"] = default_1;
 //# sourceMappingURL=InteractionCreated.js.map

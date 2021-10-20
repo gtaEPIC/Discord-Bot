@@ -2,12 +2,13 @@ import Track from "./Track";
 import {Guild, GuildMember, StageChannel, TextChannel, VoiceChannel} from "discord.js";
 import {
     AudioPlayer,
+    AudioPlayerState,
     AudioPlayerStatus,
     DiscordGatewayAdapterCreator,
     joinVoiceChannel,
     VoiceConnection
 } from "@discordjs/voice";
-import * as ytdl from "ytdl-core-as";
+import * as ytdl from "ytdl-core";
 import * as ytSearch from "yt-search";
 import Player from "./Player";
 import {secondsToTime} from "../Extras";
@@ -71,16 +72,19 @@ export default class Queue {
         if (!this.playing) this.next().then();
     }
 
-    createStateCheck() {
+    stateChange(oldState: AudioPlayerState, newState: AudioPlayerState) {
         let track: Track = this.playing;
-        this.audioPlayer.on("stateChange", (oldState, newState) => {
-            console.log("Time Check: ", Math.floor(oldState["playbackDuration"] / 1000), track.duration - 5)
-            if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Buffering &&
-                Math.floor(oldState["playbackDuration"] / 1000) >= track.duration - 5)
-                this.onEnd(track).then();
-            else if (newState.status === AudioPlayerStatus.Idle) track.error({message: "Feed Stopped"}).then();
-            console.log("STATE CHANGE", oldState, newState);
-        });
+        //console.log("Time Check: ", Math.floor(oldState["playbackDuration"] / 1000), track.duration - 5)
+        console.log("STATE CHANGE", oldState, newState, track);
+        if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Buffering && Math.floor(oldState["playbackDuration"] / 1000) <= track.duration - 1)
+            this.onEnd().then();
+        else if (newState.status === AudioPlayerStatus.Idle)
+            track.error({message: "Feed Stopped"}).then();
+        else if (newState.status === AudioPlayerStatus.AutoPaused) setTimeout(() => this.audioPlayer.unpause(), 2000)
+    }
+
+    createStateCheck() {
+        this.audioPlayer.on("stateChange", (oldState, newState) => this.stateChange(oldState, newState));
     }
 
     async next() {
@@ -122,10 +126,13 @@ export default class Queue {
 
     rewind(): boolean {
         if (this.history.length < 1) return false;
-        if (this.playing) this.addTrack(this.playing, 1);
+        if (this.playing) {
+            this.playing.attempts = 0
+            this.addTrack(this.playing, 1);
+        }
         this.addTrack(this.history.shift(), 1)
-        if (!this.playing) this.next().then();
-        else this.skip();
+        this.playing?.onEnd()
+        this.next().then();
         //this.skip();
         return true;
     }
@@ -144,15 +151,14 @@ export default class Queue {
         return final;
     }
 
-    async onEnd(track: Track) {
+    async onEnd() {
         if (this.player.onEnd) this.player.onEnd(this, this.playing);
+        this.playing.attempts = 0
         if (this.loop === LoopModes.TRACK) this.addTrack(this.playing, 1);
         if (this.loop === LoopModes.QUEUE) this.addTrack(this.playing);
         this.updateHistory(this.playing);
+        this.playing.onEnd()
         this.playing = null;
-        await track.announcement?.delete();
-        track.announcement = undefined;
-        clearInterval(track.updater);
         await this.next();
     }
 

@@ -7,7 +7,6 @@ import {MessageButtonStyles} from "discord.js/typings/enums";
 
 require("dotenv").config();
 
-
 export const client = new Client({
     intents: [
         Intents.FLAGS.GUILDS,
@@ -16,20 +15,7 @@ export const client = new Client({
     ]
 })
 
-/*
-{
-    searchSongs: 1,
-    searchCooldown: 30,
-    leaveOnEmpty: false,
-    emptyCooldown: 0,
-    leaveOnFinish: false,
-    leaveOnStop: true,
-}
- */
-
 export const player = new Player(client)
-
-
 
 player.on("onStart", (queue, track) => {
     track.makeAnnouncement().then();

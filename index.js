@@ -14,16 +14,6 @@ exports.client = new discord_js_1.Client({
         discord_js_1.Intents.FLAGS.GUILD_VOICE_STATES
     ]
 });
-/*
-{
-    searchSongs: 1,
-    searchCooldown: 30,
-    leaveOnEmpty: false,
-    emptyCooldown: 0,
-    leaveOnFinish: false,
-    leaveOnStop: true,
-}
- */
 exports.player = new Player_1["default"](exports.client);
 exports.player.on("onStart", function (queue, track) {
     track.makeAnnouncement().then();

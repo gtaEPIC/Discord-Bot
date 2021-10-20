@@ -37,7 +37,7 @@ export default class Track {
         this.resource = createAudioResource(this.source);
 
         this.source.addListener("close", () => console.log("YTDL Closed"));
-        this.source.addListener("error", err => console.log("YTDL ERROR:", err));
+        this.source.addListener("error", err => console.error("YTDL ERROR:", err));
         this.source.addListener("error", (err => onError(err)));
         this.source.addListener("pause", () => console.log("YTDL Paused"));
         this.source.addListener("data", () => console.log("YTDL Data"));
@@ -145,19 +145,26 @@ export default class Track {
         }
     }
 
+    onEnd() {
+        this.announcement?.delete().then();
+        this.announcement = undefined;
+        clearInterval(this.updater);
+    }
+
     async play(point: number) {
         this.attempts++;
         this.initSource(await ytdl(this.url, {
             filter: "audio",
-            quality: "lowest",
-            begin: point
+            quality: "lowestaudio",
+            begin: point,
+            highWaterMark: 1<<25
         }), (err1) => this.error(err1))
         if (!this.queue.audioPlayer) {
             this.queue.audioPlayer = this.queue.connection.subscribe(createAudioPlayer({
                 debug: true
             })).player
             this.queue.createStateCheck();
-            this.queue.audioPlayer.on("error", error => console.log("AUDIO PLAYER ERROR:", error));
+            this.queue.audioPlayer.on("error", error => console.error("AUDIO PLAYER ERROR:", error));
         }
         this.queue.audioPlayer.play(this.resource);
     }
@@ -165,7 +172,8 @@ export default class Track {
     async error(err) {
         if (this.lastError >= Math.floor(Date.now() / 1000) - 5) return;
         this.lastError = Math.floor(Date.now() / 1000)
-        console.log(this);
+        console.error("Track ERROR was thrown:", err);
+        console.log("Track:", this)
         let point: number = this.resource.playbackDuration - 1000;
         if (point < 0) point = 0;
         if (this.attempts >= this.maxAttempts) {
@@ -190,7 +198,7 @@ export default class Track {
                 components: [actionRow]
             }
             await this.queue.textChannel.send(contents);
-            this.queue.onEnd(this).then();
+            this.queue.onEnd().then();
         } else {
             try {
                 //clearInterval(this.updater);

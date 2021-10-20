@@ -39,7 +39,7 @@ exports.__esModule = true;
 exports.LoopModes = void 0;
 var Track_1 = require("./Track");
 var voice_1 = require("@discordjs/voice");
-var ytdl = require("ytdl-core-as");
+var ytdl = require("ytdl-core");
 var ytSearch = require("yt-search");
 var Extras_1 = require("../Extras");
 var LoopModes;
@@ -92,18 +92,21 @@ var Queue = /** @class */ (function () {
         if (!this.playing)
             this.next().then();
     };
-    Queue.prototype.createStateCheck = function () {
+    Queue.prototype.stateChange = function (oldState, newState) {
         var _this = this;
         var track = this.playing;
-        this.audioPlayer.on("stateChange", function (oldState, newState) {
-            console.log("Time Check: ", Math.floor(oldState["playbackDuration"] / 1000), track.duration - 5);
-            if (newState.status === voice_1.AudioPlayerStatus.Idle && oldState.status !== voice_1.AudioPlayerStatus.Buffering &&
-                Math.floor(oldState["playbackDuration"] / 1000) >= track.duration - 5)
-                _this.onEnd(track).then();
-            else if (newState.status === voice_1.AudioPlayerStatus.Idle)
-                track.error({ message: "Feed Stopped" }).then();
-            console.log("STATE CHANGE", oldState, newState);
-        });
+        //console.log("Time Check: ", Math.floor(oldState["playbackDuration"] / 1000), track.duration - 5)
+        console.log("STATE CHANGE", oldState, newState, track);
+        if (newState.status === voice_1.AudioPlayerStatus.Idle && oldState.status !== voice_1.AudioPlayerStatus.Buffering && Math.floor(oldState["playbackDuration"] / 1000) <= track.duration - 1)
+            this.onEnd().then();
+        else if (newState.status === voice_1.AudioPlayerStatus.Idle)
+            track.error({ message: "Feed Stopped" }).then();
+        else if (newState.status === voice_1.AudioPlayerStatus.AutoPaused)
+            setTimeout(function () { return _this.audioPlayer.unpause(); }, 2000);
+    };
+    Queue.prototype.createStateCheck = function () {
+        var _this = this;
+        this.audioPlayer.on("stateChange", function (oldState, newState) { return _this.stateChange(oldState, newState); });
     };
     Queue.prototype.next = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -150,15 +153,16 @@ var Queue = /** @class */ (function () {
         this.connection.disconnect();
     };
     Queue.prototype.rewind = function () {
+        var _a;
         if (this.history.length < 1)
             return false;
-        if (this.playing)
+        if (this.playing) {
+            this.playing.attempts = 0;
             this.addTrack(this.playing, 1);
+        }
         this.addTrack(this.history.shift(), 1);
-        if (!this.playing)
-            this.next().then();
-        else
-            this.skip();
+        (_a = this.playing) === null || _a === void 0 ? void 0 : _a.onEnd();
+        this.next().then();
         //this.skip();
         return true;
     };
@@ -179,28 +183,24 @@ var Queue = /** @class */ (function () {
             final += (0, Extras_1.secondsToTime)(this.getTime()) + "/" + (0, Extras_1.secondsToTime)(this.playing.duration);
         return final;
     };
-    Queue.prototype.onEnd = function (track) {
-        var _a;
+    Queue.prototype.onEnd = function () {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         if (this.player.onEnd)
                             this.player.onEnd(this, this.playing);
+                        this.playing.attempts = 0;
                         if (this.loop === LoopModes.TRACK)
                             this.addTrack(this.playing, 1);
                         if (this.loop === LoopModes.QUEUE)
                             this.addTrack(this.playing);
                         this.updateHistory(this.playing);
+                        this.playing.onEnd();
                         this.playing = null;
-                        return [4 /*yield*/, ((_a = track.announcement) === null || _a === void 0 ? void 0 : _a["delete"]())];
-                    case 1:
-                        _b.sent();
-                        track.announcement = undefined;
-                        clearInterval(track.updater);
                         return [4 /*yield*/, this.next()];
-                    case 2:
-                        _b.sent();
+                    case 1:
+                        _a.sent();
                         return [2 /*return*/];
                 }
             });

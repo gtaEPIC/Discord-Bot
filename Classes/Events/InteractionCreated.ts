@@ -79,5 +79,7 @@ export default function (interaction: Interaction) {
         for (let selectMenu of selectMenus) {
             if (selectMenu.selectName === interaction.customId) selectMenu.execute(interaction);
         }
+    }else if (interaction.isContextMenu()) {
+
     }
 }
