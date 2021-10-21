@@ -1,9 +1,10 @@
-import {Client, Intents, MessageActionRow, MessageButton} from "discord.js";
+import {Client, Intents} from "discord.js";
 import OnReady from "./Classes/Events/OnReady";
 import GuildCreate from "./Classes/Events/GuildCreate";
 import InteractionCreated from "./Classes/Events/InteractionCreated";
 import Player from "./Classes/Music/Player";
-import {MessageButtonStyles} from "discord.js/typings/enums";
+import SQLSetup from "./Classes/SQL/setup/SQLSetup";
+import {dbFile} from "./Classes/Extras";
 
 require("dotenv").config();
 
@@ -14,6 +15,8 @@ export const client = new Client({
         Intents.FLAGS.GUILD_VOICE_STATES
     ]
 })
+
+SQLSetup(dbFile).then();
 
 export const player = new Player(client)
 

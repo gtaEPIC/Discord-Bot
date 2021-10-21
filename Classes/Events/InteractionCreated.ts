@@ -25,6 +25,7 @@ import SelectMenu from "./SelectMenu/SelectMenu";
 import LoopMenu from "./SelectMenu/Music/LoopMenu";
 import PlayNextButton from "./Buttons/Music/PlayNextButton";
 import PlayLastButton from "./Buttons/Music/PlayLastButton";
+import SetChannel from "./Commands/Music/SetChannel";
 
 export const commands: Array<Commands> = [
     new Play(),
@@ -38,7 +39,8 @@ export const commands: Array<Commands> = [
     new NowPlaying(),
     new QueueCommand(),
     new HistoryCommand(),
-    new ClearQueue()
+    new ClearQueue(),
+    new SetChannel()
 ];
 export const buttons: Array<Buttons> = [
     new PreviousButton(),

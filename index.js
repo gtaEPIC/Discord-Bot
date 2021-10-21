@@ -6,6 +6,8 @@ var OnReady_1 = require("./Classes/Events/OnReady");
 var GuildCreate_1 = require("./Classes/Events/GuildCreate");
 var InteractionCreated_1 = require("./Classes/Events/InteractionCreated");
 var Player_1 = require("./Classes/Music/Player");
+var SQLSetup_1 = require("./Classes/SQL/setup/SQLSetup");
+var Extras_1 = require("./Classes/Extras");
 require("dotenv").config();
 exports.client = new discord_js_1.Client({
     intents: [
@@ -14,6 +16,7 @@ exports.client = new discord_js_1.Client({
         discord_js_1.Intents.FLAGS.GUILD_VOICE_STATES
     ]
 });
+(0, SQLSetup_1["default"])(Extras_1.dbFile).then();
 exports.player = new Player_1["default"](exports.client);
 exports.player.on("onStart", function (queue, track) {
     track.makeAnnouncement().then();

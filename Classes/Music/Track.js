@@ -39,14 +39,16 @@ exports.__esModule = true;
 var discord_js_1 = require("discord.js");
 var voice_1 = require("@discordjs/voice");
 var Queue_1 = require("./Queue");
-var ytdl = require("ytdl-core");
+var YouTube_1 = require("./Downloaders/YouTube");
+var SoundCloud_1 = require("./Downloaders/SoundCloud");
 var Track = /** @class */ (function () {
-    function Track(name, author, url, requested, duration, type, queue) {
+    function Track(name, author, url, sourceLink, requested, duration, type, queue) {
         this.attempts = 0;
         this.maxAttempts = 3;
         this.name = name;
         this.author = author;
         this.url = url;
+        this.sourceLink = sourceLink;
         this.requested = requested;
         this.duration = duration;
         this.type = type;
@@ -55,14 +57,14 @@ var Track = /** @class */ (function () {
     Track.prototype.initSource = function (source, onError) {
         this.source = source;
         this.resource = (0, voice_1.createAudioResource)(this.source);
-        this.source.addListener("close", function () { return console.log("YTDL Closed"); });
-        this.source.addListener("error", function (err) { return console.error("YTDL ERROR:", err); });
+        this.source.addListener("close", function () { return console.log("Stream Closed"); });
+        this.source.addListener("error", function (err) { return console.error("Stream ERROR:", err); });
         this.source.addListener("error", (function (err) { return onError(err); }));
-        this.source.addListener("pause", function () { return console.log("YTDL Paused"); });
-        this.source.addListener("data", function () { return console.log("YTDL Data"); });
+        this.source.addListener("pause", function () { return console.log("Stream Paused"); });
+        this.source.addListener("data", function () { return console.log("Stream Data"); });
         //this.source.addListener("readable", () => console.log("YTDL Readable"));
-        this.source.addListener("end", function () { return console.log("YTDL End"); });
-        this.source.addListener("resume", function () { return console.log("YTDL Resume"); });
+        this.source.addListener("end", function () { return console.log("Stream End"); });
+        this.source.addListener("resume", function () { return console.log("Stream Resume"); });
     };
     Track.prototype.makeAnnouncement = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -181,21 +183,25 @@ var Track = /** @class */ (function () {
     };
     Track.prototype.play = function (point) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
+            var data;
             var _this = this;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         this.attempts++;
-                        _a = this.initSource;
-                        return [4 /*yield*/, ytdl(this.url, {
-                                filter: "audio",
-                                quality: "lowestaudio",
-                                begin: point,
-                                highWaterMark: 1 << 25
-                            })];
+                        if (!(this.type === "youtube")) return [3 /*break*/, 2];
+                        return [4 /*yield*/, new YouTube_1["default"]().download(this.sourceLink, point)];
                     case 1:
-                        _a.apply(this, [_b.sent(), function (err1) { return _this.error(err1); }]);
+                        data = _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2:
+                        if (!(this.type === "soundcloud")) return [3 /*break*/, 4];
+                        return [4 /*yield*/, new SoundCloud_1["default"]().download(this.sourceLink, point)];
+                    case 3:
+                        data = _a.sent();
+                        _a.label = 4;
+                    case 4:
+                        this.initSource(data, function (err1) { return _this.error(err1); });
                         if (!this.queue.audioPlayer) {
                             this.queue.audioPlayer = this.queue.connection.subscribe((0, voice_1.createAudioPlayer)({
                                 debug: true

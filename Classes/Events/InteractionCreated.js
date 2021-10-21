@@ -24,6 +24,7 @@ var NowPlayingButton_1 = require("./Buttons/Music/NowPlayingButton");
 var LoopMenu_1 = require("./SelectMenu/Music/LoopMenu");
 var PlayNextButton_1 = require("./Buttons/Music/PlayNextButton");
 var PlayLastButton_1 = require("./Buttons/Music/PlayLastButton");
+var SetChannel_1 = require("./Commands/Music/SetChannel");
 exports.commands = [
     new Play_1["default"](),
     new PlayNext_1["default"](),
@@ -36,7 +37,8 @@ exports.commands = [
     new NowPlaying_1["default"](),
     new QueueCommand_1["default"](),
     new HistoryCommand_1["default"](),
-    new ClearQueue_1["default"]()
+    new ClearQueue_1["default"](),
+    new SetChannel_1["default"]()
 ];
 exports.buttons = [
     new PreviousButton_1["default"](),

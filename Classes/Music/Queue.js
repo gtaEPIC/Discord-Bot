@@ -36,18 +36,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.LoopModes = void 0;
+exports.searchErrorReason = exports.LoopModes = void 0;
 var Track_1 = require("./Track");
 var voice_1 = require("@discordjs/voice");
 var ytdl = require("ytdl-core");
 var ytSearch = require("yt-search");
+var ytlist = require("youtube-search-api");
 var Extras_1 = require("../Extras");
+var PlayList_1 = require("./PlayList");
+var soundcloud_downloader_1 = require("soundcloud-downloader");
 var LoopModes;
 (function (LoopModes) {
     LoopModes[LoopModes["OFF"] = 0] = "OFF";
     LoopModes[LoopModes["TRACK"] = 1] = "TRACK";
     LoopModes[LoopModes["QUEUE"] = 2] = "QUEUE";
 })(LoopModes = exports.LoopModes || (exports.LoopModes = {}));
+var searchErrorReason = /** @class */ (function () {
+    function searchErrorReason() {
+    }
+    return searchErrorReason;
+}());
+exports.searchErrorReason = searchErrorReason;
 var Queue = /** @class */ (function () {
     function Queue(player, guild, voice, textChannel) {
         this.connection = null;
@@ -71,6 +80,35 @@ var Queue = /** @class */ (function () {
             adapterCreator: this.guild.voiceAdapterCreator
         });
     };
+    Queue.prototype.createConnection = function (replied) {
+        return __awaiter(this, void 0, void 0, function () {
+            var e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 4, , 6]);
+                        if (!!this.connection) return [3 /*break*/, 3];
+                        return [4 /*yield*/, replied.edit("🔈 | Attempting to join channel")];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.connect()];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [3 /*break*/, 6];
+                    case 4:
+                        e_1 = _a.sent();
+                        console.log(e_1);
+                        return [4 /*yield*/, replied.edit({ content: "❌ | An error occurred while attempting to join!" })];
+                    case 5:
+                        _a.sent();
+                        this["delete"]();
+                        return [2 /*return*/];
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
     Queue.prototype.resume = function () {
         this.paused = false;
         this.audioPlayer.unpause();
@@ -83,8 +121,10 @@ var Queue = /** @class */ (function () {
         if (position === void 0) { position = -1; }
         if (position < 0)
             this.songs.push(track);
-        else
+        else if (position === 0)
             this.songs.unshift(track);
+        else
+            this.songs.splice(position, 0, track);
     };
     Queue.prototype.play = function (track) {
         this.addTrack(track);
@@ -102,7 +142,7 @@ var Queue = /** @class */ (function () {
         else if (newState.status === voice_1.AudioPlayerStatus.Idle)
             track.error({ message: "Feed Stopped" }).then();
         else if (newState.status === voice_1.AudioPlayerStatus.AutoPaused)
-            setTimeout(function () { return _this.audioPlayer.unpause(); }, 2000);
+            setTimeout(function () { var _a; return (_a = _this.audioPlayer) === null || _a === void 0 ? void 0 : _a.unpause(); }, 2000);
     };
     Queue.prototype.createStateCheck = function () {
         var _this = this;
@@ -148,9 +188,14 @@ var Queue = /** @class */ (function () {
         this.audioPlayer.stop();
     };
     Queue.prototype.stop = function () {
+        var _a;
         this.songs = [];
-        this.audioPlayer.stop();
+        this.audioPlayer.stop(true);
+        this.audioPlayer = null;
+        (_a = this.playing) === null || _a === void 0 ? void 0 : _a.onEnd();
+        this.playing = null;
         this.connection.disconnect();
+        this.connection = null;
     };
     Queue.prototype.rewind = function () {
         var _a;
@@ -210,32 +255,84 @@ var Queue = /** @class */ (function () {
         if (this.player.onEmpty)
             this.player.onEmpty(this);
     };
-    Queue.prototype.search = function (request, member) {
+    Queue.prototype.search = function (request, member, message) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var response_1, response, e_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var response, id, args, _i, args_1, arg, response, playlist, count, emojiState, lastUpdate, _b, _c, track, emoji, details, response, response, e_2;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        _b.trys.push([0, 4, , 5]);
+                        _d.trys.push([0, 15, , 16]);
                         if (!!request.startsWith("http")) return [3 /*break*/, 2];
                         return [4 /*yield*/, ytSearch(request)];
                     case 1:
-                        response_1 = _b.sent();
-                        if (!((_a = response_1 === null || response_1 === void 0 ? void 0 : response_1.all) === null || _a === void 0 ? void 0 : _a.length))
-                            return [2 /*return*/, null];
-                        request = response_1.all[0].url;
-                        _b.label = 2;
-                    case 2: return [4 /*yield*/, ytdl.getInfo(request)];
+                        response = _d.sent();
+                        if (!((_a = response === null || response === void 0 ? void 0 : response.all) === null || _a === void 0 ? void 0 : _a.length))
+                            return [2 /*return*/, { reason: "No Results Found" }];
+                        request = response.all[0].url;
+                        _d.label = 2;
+                    case 2:
+                        if (!(request.includes("youtube") || request.includes("youtu.be"))) return [3 /*break*/, 11];
+                        if (!request.includes("list")) return [3 /*break*/, 8];
+                        id = "";
+                        args = request.split("?")[1].split("&");
+                        for (_i = 0, args_1 = args; _i < args_1.length; _i++) {
+                            arg = args_1[_i];
+                            if (arg.startsWith("list"))
+                                id = arg.split("=")[1];
+                        }
+                        return [4 /*yield*/, ytlist.GetPlaylistData(id)];
                     case 3:
-                        response = _b.sent();
-                        console.log(response.videoDetails.lengthSeconds);
-                        return [2 /*return*/, new Track_1["default"](response.videoDetails.title, response.videoDetails.author.name, response.videoDetails.video_url, member, parseInt(response.videoDetails.lengthSeconds), "youtube", this)];
+                        response = _d.sent();
+                        console.log(response);
+                        playlist = new PlayList_1["default"]();
+                        playlist.name = response.metadata.playlistMetadataRenderer.title;
+                        count = 0;
+                        emojiState = false;
+                        lastUpdate = 0;
+                        _b = 0, _c = response.items;
+                        _d.label = 4;
                     case 4:
-                        e_1 = _b.sent();
-                        console.log(e_1);
+                        if (!(_b < _c.length)) return [3 /*break*/, 7];
+                        track = _c[_b];
+                        count++;
+                        if (lastUpdate + 5000 < Date.now()) {
+                            emoji = "⏳";
+                            if (emojiState)
+                                emoji = "⌛";
+                            emojiState = !emojiState;
+                            message === null || message === void 0 ? void 0 : message.edit({ content: emoji + " | Adding songs to queue (" + count + "/" + response.items.length + ")" });
+                            lastUpdate = Date.now();
+                        }
+                        return [4 /*yield*/, ytdl.getInfo("https://www.youtube.com/watch?v=" + track.id)];
+                    case 5:
+                        details = _d.sent();
+                        playlist.tracks.push(new Track_1["default"](details.videoDetails.title, details.videoDetails.author.name, details.videoDetails.video_url, details.videoDetails.video_url, member, parseInt(details.videoDetails.lengthSeconds), "youtube", this));
+                        _d.label = 6;
+                    case 6:
+                        _b++;
+                        return [3 /*break*/, 4];
+                    case 7: return [2 /*return*/, playlist];
+                    case 8: return [4 /*yield*/, ytdl.getInfo(request)];
+                    case 9:
+                        response = _d.sent();
+                        console.log(response.videoDetails.lengthSeconds);
+                        return [2 /*return*/, new Track_1["default"](response.videoDetails.title, response.videoDetails.author.name, response.videoDetails.video_url, response.videoDetails.video_url, member, parseInt(response.videoDetails.lengthSeconds), "youtube", this)];
+                    case 10: return [3 /*break*/, 14];
+                    case 11:
+                        if (!(request.includes("soundcloud") && soundcloud_downloader_1["default"].isValidUrl(request))) return [3 /*break*/, 13];
+                        return [4 /*yield*/, soundcloud_downloader_1["default"].getInfo(request)];
+                    case 12:
+                        response = _d.sent();
+                        console.log(response);
+                        return [2 /*return*/, new Track_1["default"](response.title, response.user.username, request, response.uri, member, Math.floor(response.duration / 1000), "soundcloud", this)];
+                    case 13: return [2 /*return*/, { reason: "Unsupported source" }];
+                    case 14: return [3 /*break*/, 16];
+                    case 15:
+                        e_2 = _d.sent();
+                        console.error(e_2);
                         return [2 /*return*/, null];
-                    case 5: return [2 /*return*/];
+                    case 16: return [2 /*return*/];
                 }
             });
         });

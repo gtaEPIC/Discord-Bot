@@ -37,8 +37,8 @@ export default class QueueCommand extends Commands {
             let song: Track = queue.songs[i];
             embed.addField((i + 1) + ". " + song.name + " `(" + secondsToTime(song.duration) + ")`",
                 "Author: " + song.author + "\n" +
-                "Requested By: <@" + song.requested.id + ">\n" +
-                "[Link](" + song.url + ")");
+                "[Link](" + song.url + ")\n" +
+                "Requested By: <@" + song.requested.id + ">");
         }
         if (max === 0) {
             embed.addField("Nothing is in the queue", "There are no tracks in the queue.")

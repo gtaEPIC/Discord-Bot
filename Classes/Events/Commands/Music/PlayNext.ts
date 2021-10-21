@@ -3,17 +3,21 @@ import {CommandInteraction, GuildMember, Message, TextChannel} from "discord.js"
 import {SlashCommandBuilder, SlashCommandStringOption} from "@discordjs/builders";
 
 import {player} from "../../../../index";
-import Play from "./Play";
+import Play, {addSong} from "./Play";
 import {APIMessage} from "discord-api-types";
-import {checkVC} from "../../../Extras";
+import {checkMusicChannel, checkVC} from "../../../Extras";
 import Queue from "../../../Music/Queue";
 import Track from "../../../Music/Track";
+import SQLMusicChannel from "../../../SQL/SQLMusicChannel";
 
 export default class PlayNext extends Commands {
 
     commandName: string = "play-next";
 
     async execute(interaction: CommandInteraction, args) {
+        if (!await checkMusicChannel(interaction.guild, interaction.channel.id))
+            return interaction.reply({content: "❌ | Sorry, please use this command in <#" +
+                    (await SQLMusicChannel.getMusicChannel(interaction.guild)).id + ">", ephemeral: true})
         if (await checkVC(interaction)) return;
         let member: GuildMember = <GuildMember>interaction.member
         let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
@@ -24,10 +28,7 @@ export default class PlayNext extends Commands {
                 fetchReply: true
             }))
             const query = args["query"];
-            const results: Track = await queue.search(query, member);
-            if (!results) return await replied.edit({ content: `❌ | Track **${query}** not found!` });
-            queue.addTrack(results, 1);
-            await replied.edit(`⏱ | Queued track **${results.name}**! It will be played next`)
+            await addSong(queue, query, member, replied, true)
         }
     }
 

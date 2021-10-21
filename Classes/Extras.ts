@@ -1,9 +1,48 @@
-import {CommandInteraction, Guild, GuildMember, Interaction, TextChannel} from "discord.js";
+import {
+    Channel,
+    CommandInteraction,
+    Guild,
+    GuildChannel,
+    GuildMember,
+    Interaction, TextBasedChannels,
+    TextChannel,
+    ThreadChannel
+} from "discord.js";
 import { REST } from "@discordjs/rest";
-import {APIInteractionGuildMember, Routes} from "discord-api-types/v9";
-import {client, player} from "../index";
+import {Routes} from "discord-api-types/v9";
+import {client} from "../index";
 import {commands} from "./Events/InteractionCreated";
+import * as sqlite3 from "sqlite3";
+import {ISqlite} from "sqlite";
+import SQLMusicChannel from "./SQL/SQLMusicChannel";
 require("dotenv").config();
+
+export const dbFile: string = "database.db"
+
+export const DBConfig: ISqlite.Config = {
+    filename: dbFile,
+    driver: sqlite3.Database
+}
+
+/**
+ * Removes a specific value from an array
+ * @param toRemove The key that will be removed
+ * @param array The array to remove the key from
+ */
+export function removeFromArray(toRemove: any, array: Array<any>) {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === toRemove) {
+            array.splice(i,1);
+            return
+        }
+    }
+}
+
+export async function checkMusicChannel(guild: Guild, channelId: string): Promise<boolean> {
+    if (!await SQLMusicChannel.hasMusicChannel(guild)) return true;
+    let setChannel = await SQLMusicChannel.getMusicChannel(guild);
+    return setChannel.id === channelId;
+}
 
 export async function createCommands(guild: Guild): Promise<Boolean> {
     const cmd = commands.map(command => command.createCommand())

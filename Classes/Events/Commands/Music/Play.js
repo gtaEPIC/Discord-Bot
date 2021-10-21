@@ -51,10 +51,76 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.addSong = void 0;
 var Commands_1 = require("../Commands");
+var discord_js_1 = require("discord.js");
 var index_1 = require("../../../../index");
 var builders_1 = require("@discordjs/builders");
 var Extras_1 = require("../../../Extras");
+var Queue_1 = require("../../../Music/Queue");
+var PlayList_1 = require("../../../Music/PlayList");
+var SQLMusicChannel_1 = require("../../../SQL/SQLMusicChannel");
+function addSong(queue, query, member, replied, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var results, embed, button, counts, _i, _a, track;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, queue.search(query, member, replied)];
+                case 1:
+                    results = _b.sent();
+                    if (!!results) return [3 /*break*/, 3];
+                    return [4 /*yield*/, replied.edit({ content: "\u274C | Track **" + query + "** not found!" })];
+                case 2: return [2 /*return*/, _b.sent()];
+                case 3:
+                    if (!(results instanceof Queue_1.searchErrorReason)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, replied.edit({ content: "\u274C | A problem occurred trying to get **" + query + "**!\nReason: " + results.reason })];
+                case 4: return [2 /*return*/, _b.sent()];
+                case 5: return [4 /*yield*/, queue.createConnection(replied)];
+                case 6:
+                    _b.sent();
+                    if (!(results instanceof PlayList_1["default"])) return [3 /*break*/, 8];
+                    embed = new discord_js_1.MessageEmbed()
+                        .setTitle("Queued a Playlist")
+                        .setDescription("Playlist: [" + results.name + "](https://www.youtube.com/playlist?list=" + results.id + ")\n" +
+                        "Tracks that were added:");
+                    button = new discord_js_1.MessageButton()
+                        .setLabel("Show Queue")
+                        .setStyle(1 /* PRIMARY */)
+                        .setCustomId("queue");
+                    counts = 0;
+                    for (_i = 0, _a = results.tracks; _i < _a.length; _i++) {
+                        track = _a[_i];
+                        counts++;
+                        if (next)
+                            queue.addTrack(track, counts - 1);
+                        else
+                            queue.addTrack(track);
+                        if (counts <= 5)
+                            embed.addField(track.name + " (" + (0, Extras_1.secondsToTime)(track.duration) + ")", "Author: " + track.author + "\n" +
+                                "[Link](" + track.url + ")");
+                    }
+                    counts -= 5;
+                    if (counts > 0)
+                        embed.addField("Plus " + counts + " more", "Click the Show Queue button or use the `/queue` command to see all the songs");
+                    if (!queue.playing)
+                        queue.next().then();
+                    return [4 /*yield*/, replied.edit({
+                            content: "✅ | Finished" + (next ? " songs were added to play next" : ""),
+                            embeds: [embed],
+                            components: [new discord_js_1.MessageActionRow({ components: [button] })]
+                        })];
+                case 7: return [2 /*return*/, _b.sent()];
+                case 8:
+                    queue.play(results);
+                    return [4 /*yield*/, replied.edit({ content: "\u23F1 | Queued track **" + results.name + "**" + (next ? " and will play next" : "") + "!" })];
+                case 9: 
+                //if (!queue.playing || !queue.paused) await queue.resume();
+                return [2 /*return*/, _b.sent()];
+            }
+        });
+    });
+}
+exports.addSong = addSong;
 var Play = /** @class */ (function (_super) {
     __extends(Play, _super);
     function Play() {
@@ -64,61 +130,44 @@ var Play = /** @class */ (function (_super) {
     }
     Play.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var member, e_1, queue, replied, query, results, e_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
+            var _a, _b, _c, member, e_1, queue, replied, query;
+            var _d;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
+                    case 0: return [4 /*yield*/, (0, Extras_1.checkMusicChannel)(interaction.guild, interaction.channel.id)];
                     case 1:
-                        if (_a.sent())
-                            return [2 /*return*/];
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 3, , 5]);
-                        member = interaction.member;
-                        return [3 /*break*/, 5];
-                    case 3:
-                        e_1 = _a.sent();
-                        return [4 /*yield*/, interaction.reply({ content: "Whoops, an error Occurred. (E5001)", ephemeral: true })];
+                        if (!!(_e.sent())) return [3 /*break*/, 3];
+                        _b = (_a = interaction).reply;
+                        _d = {};
+                        _c = "❌ | Sorry, please use this command in <#";
+                        return [4 /*yield*/, SQLMusicChannel_1["default"].getMusicChannel(interaction.guild)];
+                    case 2: return [2 /*return*/, _b.apply(_a, [(_d.content = _c +
+                                (_e.sent()).id + ">", _d.ephemeral = true, _d)])];
+                    case 3: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
                     case 4:
-                        _a.sent();
-                        return [2 /*return*/];
+                        if (_e.sent())
+                            return [2 /*return*/];
+                        _e.label = 5;
                     case 5:
+                        _e.trys.push([5, 6, , 8]);
+                        member = interaction.member;
+                        return [3 /*break*/, 8];
+                    case 6:
+                        e_1 = _e.sent();
+                        return [4 /*yield*/, interaction.reply({ content: "Whoops, an error Occurred. (E5001)", ephemeral: true })];
+                    case 7:
+                        _e.sent();
+                        return [2 /*return*/];
+                    case 8:
                         queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
                         return [4 /*yield*/, interaction.reply({ content: "🔍 | Searching for song", fetchReply: true })];
-                    case 6:
-                        replied = (_a.sent());
-                        query = args["query"];
-                        return [4 /*yield*/, queue.search(query, member)];
-                    case 7:
-                        results = _a.sent();
-                        if (!!results) return [3 /*break*/, 9];
-                        return [4 /*yield*/, replied.edit({ content: "\u274C | Track **" + query + "** not found!" })];
-                    case 8: return [2 /*return*/, _a.sent()];
                     case 9:
-                        _a.trys.push([9, 13, , 15]);
-                        if (!!queue.connection) return [3 /*break*/, 12];
-                        return [4 /*yield*/, replied.edit("🔈 | Attempting to join channel")];
+                        replied = (_e.sent());
+                        query = args["query"];
+                        return [4 /*yield*/, addSong(queue, query, member, replied, false)];
                     case 10:
-                        _a.sent();
-                        return [4 /*yield*/, queue.connect()];
-                    case 11:
-                        _a.sent();
-                        _a.label = 12;
-                    case 12: return [3 /*break*/, 15];
-                    case 13:
-                        e_2 = _a.sent();
-                        console.log(e_2);
-                        return [4 /*yield*/, replied.edit({ content: "❌ | An error occurred while attempting to join!" })];
-                    case 14:
-                        _a.sent();
-                        queue["delete"]();
+                        _e.sent();
                         return [2 /*return*/];
-                    case 15:
-                        queue.play(results);
-                        return [4 /*yield*/, replied.edit({ content: "\u23F1 | Queued track **" + results.name + "**!" })];
-                    case 16: 
-                    //if (!queue.playing || !queue.paused) await queue.resume();
-                    return [2 /*return*/, _a.sent()];
                 }
             });
         });

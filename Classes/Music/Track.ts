@@ -11,7 +11,8 @@ import {AudioResource, createAudioPlayer, createAudioResource} from "@discordjs/
 import * as stream from "stream";
 import Queue, {LoopModes} from "./Queue";
 import {MessageButtonStyles} from "discord.js/typings/enums";
-import ytdl = require("ytdl-core");
+import YouTube from "./Downloaders/YouTube";
+import SoundCloud from "./Downloaders/SoundCloud";
 
 export default class Track {
     name: string;
@@ -22,6 +23,7 @@ export default class Track {
     duration: number;
     queue: Queue;
 
+    sourceLink: string
     source: stream.Readable;
     resource: AudioResource<null>;
 
@@ -36,22 +38,23 @@ export default class Track {
         this.source = source;
         this.resource = createAudioResource(this.source);
 
-        this.source.addListener("close", () => console.log("YTDL Closed"));
-        this.source.addListener("error", err => console.error("YTDL ERROR:", err));
+        this.source.addListener("close", () => console.log("Stream Closed"));
+        this.source.addListener("error", err => console.error("Stream ERROR:", err));
         this.source.addListener("error", (err => onError(err)));
-        this.source.addListener("pause", () => console.log("YTDL Paused"));
-        this.source.addListener("data", () => console.log("YTDL Data"));
+        this.source.addListener("pause", () => console.log("Stream Paused"));
+        this.source.addListener("data", () => console.log("Stream Data"));
         //this.source.addListener("readable", () => console.log("YTDL Readable"));
-        this.source.addListener("end", () => console.log("YTDL End"));
-        this.source.addListener("resume", () => console.log("YTDL Resume"));
+        this.source.addListener("end", () => console.log("Stream End"));
+        this.source.addListener("resume", () => console.log("Stream Resume"));
 
     }
 
 
-    constructor(name: string, author: string, url: string, requested: GuildMember, duration: number, type: string, queue: Queue) {
+    constructor(name: string, author: string, url: string, sourceLink: string, requested: GuildMember, duration: number, type: string, queue: Queue) {
         this.name = name;
         this.author = author;
         this.url = url;
+        this.sourceLink = sourceLink
         this.requested = requested;
         this.duration = duration;
         this.type = type;
@@ -153,12 +156,10 @@ export default class Track {
 
     async play(point: number) {
         this.attempts++;
-        this.initSource(await ytdl(this.url, {
-            filter: "audio",
-            quality: "lowestaudio",
-            begin: point,
-            highWaterMark: 1<<25
-        }), (err1) => this.error(err1))
+        let data: stream.Readable;
+        if (this.type === "youtube") data = await new YouTube().download(this.sourceLink, point);
+        else if (this.type === "soundcloud") data = await new SoundCloud().download(this.sourceLink, point)
+        this.initSource(data, (err1) => this.error(err1))
         if (!this.queue.audioPlayer) {
             this.queue.audioPlayer = this.queue.connection.subscribe(createAudioPlayer({
                 debug: true

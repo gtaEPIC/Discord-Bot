@@ -1,5 +1,5 @@
 import Track from "./Track";
-import {Guild, GuildMember, StageChannel, TextChannel, VoiceChannel} from "discord.js";
+import {Guild, GuildMember, Message, StageChannel, TextChannel, VoiceChannel} from "discord.js";
 import {
     AudioPlayer,
     AudioPlayerState,
@@ -10,13 +10,20 @@ import {
 } from "@discordjs/voice";
 import * as ytdl from "ytdl-core";
 import * as ytSearch from "yt-search";
+import * as ytlist from "youtube-search-api";
 import Player from "./Player";
 import {secondsToTime} from "../Extras";
+import PlayList from "./PlayList";
+import scdl from "soundcloud-downloader";
 
 export enum LoopModes {
     OFF,
     TRACK,
     QUEUE
+}
+
+export class searchErrorReason {
+    reason: string
 }
 
 export default class Queue {
@@ -51,6 +58,20 @@ export default class Queue {
         })
     }
 
+    async createConnection(replied: Message) {
+        try {
+            if (!this.connection) {
+                await replied.edit("🔈 | Attempting to join channel")
+                await this.connect()
+            }
+        } catch (e) {
+            console.log(e);
+            await replied.edit({ content: "❌ | An error occurred while attempting to join!" });
+            this.delete()
+            return
+        }
+    }
+
     resume() {
         this.paused = false;
         this.audioPlayer.unpause();
@@ -63,7 +84,8 @@ export default class Queue {
 
     addTrack(track: Track, position = -1) {
         if (position < 0) this.songs.push(track);
-        else this.songs.unshift(track);
+        else if (position === 0) this.songs.unshift(track);
+        else this.songs.splice(position, 0, track);
     }
 
     play(track: Track) {
@@ -80,7 +102,7 @@ export default class Queue {
             this.onEnd().then();
         else if (newState.status === AudioPlayerStatus.Idle)
             track.error({message: "Feed Stopped"}).then();
-        else if (newState.status === AudioPlayerStatus.AutoPaused) setTimeout(() => this.audioPlayer.unpause(), 2000)
+        else if (newState.status === AudioPlayerStatus.AutoPaused) setTimeout(() => this.audioPlayer?.unpause(), 2000)
     }
 
     createStateCheck() {
@@ -120,8 +142,12 @@ export default class Queue {
 
     stop() {
         this.songs = [];
-        this.audioPlayer.stop();
+        this.audioPlayer.stop(true);
+        this.audioPlayer = null;
+        this.playing?.onEnd();
+        this.playing = null;
         this.connection.disconnect();
+        this.connection = null;
     }
 
     rewind(): boolean {
@@ -166,26 +192,82 @@ export default class Queue {
         if (this.player.onEmpty) this.player.onEmpty(this);
     }
 
-    async search(request: string, member: GuildMember): Promise<Track | null> {
+    async search(request: string, member: GuildMember, message?: Message): Promise<Track | PlayList | searchErrorReason | null> {
         try {
             if (!request.startsWith("http")) {
                 let response = await ytSearch(request);
-                if (!response?.all?.length) return null;
+                if (!response?.all?.length) return {reason: "No Results Found"};
                 request = response.all[0].url;
             }
-            let response: ytdl.videoInfo = await ytdl.getInfo(request);
-            console.log(response.videoDetails.lengthSeconds);
-            return new Track(
-                response.videoDetails.title,
-                response.videoDetails.author.name,
-                response.videoDetails.video_url,
-                member,
-                parseInt(response.videoDetails.lengthSeconds),
-                "youtube",
-                this
-            );
+            if (request.includes("youtube") || request.includes("youtu.be")) {
+                if (request.includes("list")) {
+                    let id = "";
+                    let args = request.split("?")[1].split("&")
+                    for (let arg of args) {
+                        if (arg.startsWith("list")) id = arg.split("=")[1]
+                    }
+                    // https://www.youtube.com/watch?v=KcjUtebWrO4&list=PLaX_-TSNsrwQ6_BygacrWz9bFGeTXaKdE&index=1
+                    let response = await ytlist.GetPlaylistData(id);
+                    console.log(response)
+                    let playlist: PlayList = new PlayList()
+                    playlist.name = response.metadata.playlistMetadataRenderer.title
+                    let count = 0;
+                    let emojiState = false
+                    let lastUpdate = 0;
+                    for (const track of response.items) {
+                        count++;
+                        if (lastUpdate + 5000 < Date.now()) {
+                            let emoji = "⏳"
+                            if (emojiState) emoji = "⌛"
+                            emojiState = !emojiState
+                            message?.edit({content: emoji + " | Adding songs to queue (" + count + "/" + response.items.length + ")"})
+                            lastUpdate = Date.now();
+                        }
+                        let details: ytdl.videoInfo = await ytdl.getInfo("https://www.youtube.com/watch?v=" + track.id)
+                        playlist.tracks.push(new Track(
+                            details.videoDetails.title,
+                            details.videoDetails.author.name,
+                            details.videoDetails.video_url,
+                            details.videoDetails.video_url,
+                            member,
+                            parseInt(details.videoDetails.lengthSeconds),
+                            "youtube",
+                            this
+                        ))
+                    }
+                    return playlist
+                } else {
+                    let response: ytdl.videoInfo = await ytdl.getInfo(request);
+                    console.log(response.videoDetails.lengthSeconds);
+                    return new Track(
+                        response.videoDetails.title,
+                        response.videoDetails.author.name,
+                        response.videoDetails.video_url,
+                        response.videoDetails.video_url,
+                        member,
+                        parseInt(response.videoDetails.lengthSeconds),
+                        "youtube",
+                        this
+                    );
+                }
+            }else if (request.includes("soundcloud") && scdl.isValidUrl(request)) {
+                let response = await scdl.getInfo(request)
+                console.log(response)
+                return new Track(
+                    response.title,
+                    response.user.username,
+                    request,
+                    response.uri,
+                    member,
+                    Math.floor(response.duration / 1000),
+                    "soundcloud",
+                    this
+                )
+            }else{
+                return {reason: "Unsupported source"}
+            }
         }catch (e) {
-            console.log(e);
+            console.error(e);
             return null;
         }
     }

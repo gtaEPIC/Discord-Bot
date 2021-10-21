@@ -83,8 +83,8 @@ var QueueCommand = /** @class */ (function (_super) {
         for (var i = min; i < max; i++) {
             var song = queue.songs[i];
             embed.addField((i + 1) + ". " + song.name + " `(" + (0, Extras_1.secondsToTime)(song.duration) + ")`", "Author: " + song.author + "\n" +
-                "Requested By: <@" + song.requested.id + ">\n" +
-                "[Link](" + song.url + ")");
+                "[Link](" + song.url + ")\n" +
+                "Requested By: <@" + song.requested.id + ">");
         }
         if (max === 0) {
             embed.addField("Nothing is in the queue", "There are no tracks in the queue.");

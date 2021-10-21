@@ -36,12 +36,51 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.secondsToTime = exports.timeToSeconds = exports.toDoubleDigits = exports.checkVC = exports.fullCheck = exports.vcCheck = exports.createCommands = void 0;
+exports.secondsToTime = exports.timeToSeconds = exports.toDoubleDigits = exports.checkVC = exports.fullCheck = exports.vcCheck = exports.createCommands = exports.checkMusicChannel = exports.removeFromArray = exports.DBConfig = exports.dbFile = void 0;
 var rest_1 = require("@discordjs/rest");
 var v9_1 = require("discord-api-types/v9");
 var index_1 = require("../index");
 var InteractionCreated_1 = require("./Events/InteractionCreated");
+var sqlite3 = require("sqlite3");
+var SQLMusicChannel_1 = require("./SQL/SQLMusicChannel");
 require("dotenv").config();
+exports.dbFile = "database.db";
+exports.DBConfig = {
+    filename: exports.dbFile,
+    driver: sqlite3.Database
+};
+/**
+ * Removes a specific value from an array
+ * @param toRemove The key that will be removed
+ * @param array The array to remove the key from
+ */
+function removeFromArray(toRemove, array) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i] === toRemove) {
+            array.splice(i, 1);
+            return;
+        }
+    }
+}
+exports.removeFromArray = removeFromArray;
+function checkMusicChannel(guild, channelId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var setChannel;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, SQLMusicChannel_1["default"].hasMusicChannel(guild)];
+                case 1:
+                    if (!(_a.sent()))
+                        return [2 /*return*/, true];
+                    return [4 /*yield*/, SQLMusicChannel_1["default"].getMusicChannel(guild)];
+                case 2:
+                    setChannel = _a.sent();
+                    return [2 /*return*/, setChannel.id === channelId];
+            }
+        });
+    });
+}
+exports.checkMusicChannel = checkMusicChannel;
 function createCommands(guild) {
     return __awaiter(this, void 0, void 0, function () {
         var cmd, botID, CLIENT_ID, rest, error_1;

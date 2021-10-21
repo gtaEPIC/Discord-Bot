@@ -51,71 +51,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var Commands_1 = require("../Commands");
-var builders_1 = require("@discordjs/builders");
-var index_1 = require("../../../../index");
-var Play_1 = require("./Play");
-var Extras_1 = require("../../../Extras");
-var SQLMusicChannel_1 = require("../../../SQL/SQLMusicChannel");
-var PlayNext = /** @class */ (function (_super) {
-    __extends(PlayNext, _super);
-    function PlayNext() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.commandName = "play-next";
-        return _this;
+var ytdl = require("ytdl-core");
+var Downloaders_1 = require("./Downloaders");
+var YouTube = /** @class */ (function (_super) {
+    __extends(YouTube, _super);
+    function YouTube() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    PlayNext.prototype.execute = function (interaction, args) {
+    YouTube.prototype.download = function (url, point) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, _c, member, queue, replied, query;
-            var _d;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkMusicChannel)(interaction.guild, interaction.channel.id)];
-                    case 1:
-                        if (!!(_e.sent())) return [3 /*break*/, 3];
-                        _b = (_a = interaction).reply;
-                        _d = {};
-                        _c = "❌ | Sorry, please use this command in <#";
-                        return [4 /*yield*/, SQLMusicChannel_1["default"].getMusicChannel(interaction.guild)];
-                    case 2: return [2 /*return*/, _b.apply(_a, [(_d.content = _c +
-                                (_e.sent()).id + ">", _d.ephemeral = true, _d)])];
-                    case 3: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
-                    case 4:
-                        if (_e.sent())
-                            return [2 /*return*/];
-                        member = interaction.member;
-                        queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
-                        if (!(!queue.connection || !queue.playing)) return [3 /*break*/, 6];
-                        return [4 /*yield*/, new Play_1["default"]().execute(interaction, args)];
-                    case 5:
-                        _e.sent();
-                        return [3 /*break*/, 9];
-                    case 6: return [4 /*yield*/, interaction.reply({
-                            content: "🔍 | Searching for song",
-                            fetchReply: true
-                        })];
-                    case 7:
-                        replied = (_e.sent());
-                        query = args["query"];
-                        return [4 /*yield*/, (0, Play_1.addSong)(queue, query, member, replied, true)];
-                    case 8:
-                        _e.sent();
-                        _e.label = 9;
-                    case 9: return [2 /*return*/];
-                }
+            return __generator(this, function (_a) {
+                return [2 /*return*/, ytdl(url, {
+                        filter: "audio",
+                        quality: "lowestaudio",
+                        begin: point,
+                        highWaterMark: 1 << 25
+                    })];
             });
         });
     };
-    PlayNext.prototype.createCommand = function () {
-        return new builders_1.SlashCommandBuilder()
-            .setName(this.commandName)
-            .setDescription("Add a song to the queue to play next")
-            .addStringOption(new builders_1.SlashCommandStringOption()
-            .setName("query")
-            .setDescription("Link to audio source")
-            .setRequired(true));
-    };
-    return PlayNext;
-}(Commands_1["default"]));
-exports["default"] = PlayNext;
-//# sourceMappingURL=PlayNext.js.map
+    return YouTube;
+}(Downloaders_1["default"]));
+exports["default"] = YouTube;
+//# sourceMappingURL=YouTube.js.map

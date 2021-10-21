@@ -53,69 +53,53 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var Commands_1 = require("../Commands");
 var builders_1 = require("@discordjs/builders");
-var index_1 = require("../../../../index");
-var Play_1 = require("./Play");
-var Extras_1 = require("../../../Extras");
 var SQLMusicChannel_1 = require("../../../SQL/SQLMusicChannel");
-var PlayNext = /** @class */ (function (_super) {
-    __extends(PlayNext, _super);
-    function PlayNext() {
+var DiscordFetchHelper_1 = require("../../../DiscordFetchHelper");
+var index_1 = require("../../../../index");
+var SetChannel = /** @class */ (function (_super) {
+    __extends(SetChannel, _super);
+    function SetChannel() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.commandName = "play-next";
+        _this.commandName = "set-channel";
         return _this;
     }
-    PlayNext.prototype.execute = function (interaction, args) {
+    SetChannel.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, _c, member, queue, replied, query;
-            var _d;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkMusicChannel)(interaction.guild, interaction.channel.id)];
-                    case 1:
-                        if (!!(_e.sent())) return [3 /*break*/, 3];
-                        _b = (_a = interaction).reply;
-                        _d = {};
-                        _c = "❌ | Sorry, please use this command in <#";
-                        return [4 /*yield*/, SQLMusicChannel_1["default"].getMusicChannel(interaction.guild)];
-                    case 2: return [2 /*return*/, _b.apply(_a, [(_d.content = _c +
-                                (_e.sent()).id + ">", _d.ephemeral = true, _d)])];
-                    case 3: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
-                    case 4:
-                        if (_e.sent())
-                            return [2 /*return*/];
+            var member, _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
                         member = interaction.member;
-                        queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
-                        if (!(!queue.connection || !queue.playing)) return [3 /*break*/, 6];
-                        return [4 /*yield*/, new Play_1["default"]().execute(interaction, args)];
+                        if (!(member.id === "274311766517874691" || member.permissions.has("ADMINISTRATOR"))) return [3 /*break*/, 4];
+                        _b = (_a = SQLMusicChannel_1["default"]).setMusicChannel;
+                        _c = [interaction.guild];
+                        return [4 /*yield*/, DiscordFetchHelper_1.DiscordFetchHelpers.findChannel(index_1.client, interaction.guild, args["channel"])];
+                    case 1: return [4 /*yield*/, _b.apply(_a, _c.concat([_d.sent()]))];
+                    case 2:
+                        _d.sent();
+                        return [4 /*yield*/, interaction.reply({ content: "Channel has been set", ephemeral: true })];
+                    case 3:
+                        _d.sent();
+                        return [3 /*break*/, 6];
+                    case 4: return [4 /*yield*/, interaction.reply({ content: "Sorry you don't have permissions to do that", ephemeral: true })];
                     case 5:
-                        _e.sent();
-                        return [3 /*break*/, 9];
-                    case 6: return [4 /*yield*/, interaction.reply({
-                            content: "🔍 | Searching for song",
-                            fetchReply: true
-                        })];
-                    case 7:
-                        replied = (_e.sent());
-                        query = args["query"];
-                        return [4 /*yield*/, (0, Play_1.addSong)(queue, query, member, replied, true)];
-                    case 8:
-                        _e.sent();
-                        _e.label = 9;
-                    case 9: return [2 /*return*/];
+                        _d.sent();
+                        _d.label = 6;
+                    case 6: return [2 /*return*/];
                 }
             });
         });
     };
-    PlayNext.prototype.createCommand = function () {
+    SetChannel.prototype.createCommand = function () {
         return new builders_1.SlashCommandBuilder()
             .setName(this.commandName)
-            .setDescription("Add a song to the queue to play next")
-            .addStringOption(new builders_1.SlashCommandStringOption()
-            .setName("query")
-            .setDescription("Link to audio source")
+            .setDescription("Requires Admin, set's the music channel for the bot. Only /play commands will work there")
+            .addChannelOption(new builders_1.SlashCommandChannelOption()
+            .setName("channel")
+            .setDescription("The channel for the /play commands to only work in")
             .setRequired(true));
     };
-    return PlayNext;
+    return SetChannel;
 }(Commands_1["default"]));
-exports["default"] = PlayNext;
-//# sourceMappingURL=PlayNext.js.map
+exports["default"] = SetChannel;
+//# sourceMappingURL=SetChannel.js.map
