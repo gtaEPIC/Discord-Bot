@@ -25,6 +25,8 @@ var LoopMenu_1 = require("./SelectMenu/Music/LoopMenu");
 var PlayNextButton_1 = require("./Buttons/Music/PlayNextButton");
 var PlayLastButton_1 = require("./Buttons/Music/PlayLastButton");
 var SetChannel_1 = require("./Commands/Music/SetChannel");
+var RollDice_1 = require("./Commands/Random/RollDice");
+var ReRoll_1 = require("./Buttons/Random/ReRoll");
 exports.commands = [
     new Play_1["default"](),
     new PlayNext_1["default"](),
@@ -38,7 +40,8 @@ exports.commands = [
     new QueueCommand_1["default"](),
     new HistoryCommand_1["default"](),
     new ClearQueue_1["default"](),
-    new SetChannel_1["default"]()
+    new SetChannel_1["default"](),
+    new RollDice_1["default"]()
 ];
 exports.buttons = [
     new PreviousButton_1["default"](),
@@ -50,7 +53,8 @@ exports.buttons = [
     new HistoryButton_1["default"](),
     new NowPlayingButton_1["default"](),
     new PlayNextButton_1["default"](),
-    new PlayLastButton_1["default"]()
+    new PlayLastButton_1["default"](),
+    new ReRoll_1["default"]()
 ];
 exports.selectMenus = [
     new LoopMenu_1["default"]()
@@ -72,7 +76,7 @@ function default_1(interaction) {
         }
     }
     else if (interaction.isButton()) {
-        var args = interaction.customId.split("-");
+        var args = interaction.customId.split("+=+");
         interaction.customId = args.shift();
         for (var _b = 0, buttons_1 = exports.buttons; _b < buttons_1.length; _b++) {
             var button = buttons_1[_b];

@@ -233,11 +233,11 @@ var Track = /** @class */ (function () {
                         playNextButton = new discord_js_1.MessageButton()
                             .setStyle(1 /* PRIMARY */)
                             .setLabel("Play Next")
-                            .setCustomId("playnext-" + this.url);
+                            .setCustomId("playnext+=+" + this.url);
                         playLastButton = new discord_js_1.MessageButton()
                             .setStyle(2 /* SECONDARY */)
                             .setLabel("Add to queue")
-                            .setCustomId("playlast-" + this.url);
+                            .setCustomId("playlast+=+" + this.url);
                         actionRow = new discord_js_1.MessageActionRow({ components: [playNextButton, playLastButton] });
                         details = new discord_js_1.MessageEmbed()
                             .setTitle("Error Details")

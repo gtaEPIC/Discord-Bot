@@ -26,6 +26,8 @@ import LoopMenu from "./SelectMenu/Music/LoopMenu";
 import PlayNextButton from "./Buttons/Music/PlayNextButton";
 import PlayLastButton from "./Buttons/Music/PlayLastButton";
 import SetChannel from "./Commands/Music/SetChannel";
+import RollDice from "./Commands/Random/RollDice";
+import ReRoll from "./Buttons/Random/ReRoll";
 
 export const commands: Array<Commands> = [
     new Play(),
@@ -40,7 +42,8 @@ export const commands: Array<Commands> = [
     new QueueCommand(),
     new HistoryCommand(),
     new ClearQueue(),
-    new SetChannel()
+    new SetChannel(),
+    new RollDice()
 ];
 export const buttons: Array<Buttons> = [
     new PreviousButton(),
@@ -52,7 +55,8 @@ export const buttons: Array<Buttons> = [
     new HistoryButton(),
     new NowPlayingButton(),
     new PlayNextButton(),
-    new PlayLastButton()
+    new PlayLastButton(),
+    new ReRoll()
 ]
 export const selectMenus: Array<SelectMenu> = [
     new LoopMenu()
@@ -72,7 +76,7 @@ export default function (interaction: Interaction) {
             if (command.commandName === interaction.commandName) command.execute(interaction, args);
         }
     }else if (interaction.isButton()) {
-        let args = interaction.customId.split("-");
+        let args = interaction.customId.split("+=+");
         interaction.customId = args.shift();
         for (let button of buttons) {
             if (button.buttonName === interaction.customId) button.execute(interaction, args);

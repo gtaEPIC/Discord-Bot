@@ -54,80 +54,37 @@ exports.__esModule = true;
 var Commands_1 = require("../Commands");
 var discord_js_1 = require("discord.js");
 var builders_1 = require("@discordjs/builders");
-var Extras_1 = require("../../../Extras");
-var index_1 = require("../../../../index");
-var QueueCommand = /** @class */ (function (_super) {
-    __extends(QueueCommand, _super);
-    function QueueCommand() {
+var RollDice = /** @class */ (function (_super) {
+    __extends(RollDice, _super);
+    function RollDice() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.commandName = "queue";
+        _this.commandName = "roll";
         return _this;
     }
-    QueueCommand.prototype.getEmbed = function (interaction, args) {
-        var member = interaction.member;
-        var queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
-        var track = queue.playing;
-        var embed = new discord_js_1.MessageEmbed()
-            .setTitle("Queue:")
-            .setDescription((track) ? "Currently Playing **" + track.name + "**\nNext Songs:" : "Nothing is playing right now.");
-        var page = args["page"];
-        if (!page || page < 1)
-            page = 1;
-        var min = (page - 1) * 5;
-        if (min > queue.songs.length)
-            min -= 5;
-        var max = page * 5;
-        if (max > queue.songs.length)
-            max = queue.songs.length;
-        //console.log(min, max, page)
-        for (var i = min; i < max; i++) {
-            var song = queue.songs[i];
-            embed.addField((i + 1) + ". " + song.name + " `(" + (0, Extras_1.secondsToTime)(song.duration) + ")`", "Author: " + song.author + "\n" +
-                "[Link](" + song.url + ")\n" +
-                "Requested By: <@" + song.requested.id + ">");
-        }
-        if (max === 0) {
-            embed.addField("Nothing is in the queue", "There are no tracks in the queue.");
-        }
-        var totalPages = Math.floor(queue.songs.length / 5) + 1;
-        embed.setFooter("Page " + page + "/" + totalPages);
-        return embed;
-    };
-    QueueCommand.prototype.getButtons = function (interaction, args) {
-        var member = interaction.member;
-        var queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
-        var totalPages = Math.floor(queue.songs.length / 5) + 1;
-        var page = args["page"];
-        if (!page || page < 1)
-            page = 1;
-        var previousButton = new discord_js_1.MessageButton()
-            .setStyle(2 /* SECONDARY */)
-            .setLabel("⬅ | Previous Page")
-            .setCustomId("queue+=+" + (page - 1))
-            .setDisabled(page === 1);
-        var refreshButton = new discord_js_1.MessageButton()
+    RollDice.prototype.rollDice = function (sides, interaction) {
+        var random = Math.floor((Math.random() * (sides - 1)) + 1);
+        var reRoll = new discord_js_1.MessageButton()
             .setStyle(1 /* PRIMARY */)
-            .setLabel("🔄 | Refresh")
-            .setCustomId("queue+=+" + page);
-        var nextButton = new discord_js_1.MessageButton()
-            .setStyle(2 /* SECONDARY */)
-            .setLabel("➡ | Next Page")
-            .setCustomId("queue+=+" + (page + 1))
-            .setDisabled(page >= totalPages);
-        return new discord_js_1.MessageActionRow({ components: [previousButton, refreshButton, nextButton] });
+            .setLabel("Re-roll")
+            .setCustomId("re-roll+=+" + sides);
+        return interaction.reply({
+            content: "🎲 | You rolled a " + random + " on a " + sides + " sided dice.",
+            components: [new discord_js_1.MessageActionRow({ components: [reRoll] })]
+        });
     };
-    QueueCommand.prototype.execute = function (interaction, args) {
+    RollDice.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var embed, actionRow;
+            var sides;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        embed = this.getEmbed(interaction, args);
-                        actionRow = this.getButtons(interaction, args);
-                        return [4 /*yield*/, interaction.reply({
-                                embeds: [embed],
-                                components: [actionRow]
-                            })];
+                        if (args["sides"] && args["sides"] <= 1)
+                            return [2 /*return*/, interaction.reply({
+                                    content: "❌ | Invalid Sides",
+                                    ephemeral: true
+                                })];
+                        sides = (args["sides"] ? args["sides"] : 6);
+                        return [4 /*yield*/, this.rollDice(sides, interaction)];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -135,15 +92,16 @@ var QueueCommand = /** @class */ (function (_super) {
             });
         });
     };
-    QueueCommand.prototype.createCommand = function () {
+    RollDice.prototype.createCommand = function () {
         return new builders_1.SlashCommandBuilder()
             .setName(this.commandName)
-            .setDescription("Shows the current queue")
-            .addIntegerOption(new builders_1.SlashCommandIntegerOption()
-            .setName("page")
-            .setDescription("The page number for the queue list."));
+            .setDescription("Rolls a dice")
+            .addNumberOption(new builders_1.SlashCommandNumberOption()
+            .setName("sides")
+            .setDescription("Default is 6")
+            .setRequired(false));
     };
-    return QueueCommand;
+    return RollDice;
 }(Commands_1["default"]));
-exports["default"] = QueueCommand;
-//# sourceMappingURL=QueueCommand.js.map
+exports["default"] = RollDice;
+//# sourceMappingURL=RollDice.js.map

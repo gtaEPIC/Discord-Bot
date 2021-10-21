@@ -181,11 +181,11 @@ export default class Track {
             let playNextButton: MessageButton = new MessageButton()
                 .setStyle(MessageButtonStyles.PRIMARY)
                 .setLabel("Play Next")
-                .setCustomId("playnext-" + this.url);
+                .setCustomId("playnext+=+" + this.url);
             let playLastButton: MessageButton = new MessageButton()
                 .setStyle(MessageButtonStyles.SECONDARY)
                 .setLabel("Add to queue")
-                .setCustomId("playlast-" + this.url);
+                .setCustomId("playlast+=+" + this.url);
             let actionRow: MessageActionRow = new MessageActionRow({components: [playNextButton, playLastButton]})
             let details: MessageEmbed = new MessageEmbed()
                 .setTitle("Error Details")

@@ -56,16 +56,16 @@ export default class QueueCommand extends Commands {
         let previousButton: MessageButton = new MessageButton()
             .setStyle(MessageButtonStyles.SECONDARY)
             .setLabel("⬅ | Previous Page")
-            .setCustomId("queue-" + (page - 1))
+            .setCustomId("queue+=+" + (page - 1))
             .setDisabled(page === 1);
         let refreshButton: MessageButton = new MessageButton()
             .setStyle(MessageButtonStyles.PRIMARY)
             .setLabel("🔄 | Refresh")
-            .setCustomId("queue-" + page);
+            .setCustomId("queue+=+" + page);
         let nextButton: MessageButton = new MessageButton()
             .setStyle(MessageButtonStyles.SECONDARY)
             .setLabel("➡ | Next Page")
-            .setCustomId("queue-" + (page + 1))
+            .setCustomId("queue+=+" + (page + 1))
             .setDisabled(page >= totalPages);
         return new MessageActionRow({components: [previousButton, refreshButton, nextButton]})
     }
