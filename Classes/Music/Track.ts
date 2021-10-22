@@ -41,11 +41,17 @@ export default class Track {
         this.source.addListener("close", () => console.log("Stream Closed"));
         this.source.addListener("error", err => console.error("Stream ERROR:", err));
         this.source.addListener("error", (err => onError(err)));
-        this.source.addListener("pause", () => console.log("Stream Paused"));
-        this.source.addListener("data", () => console.log("Stream Data"));
+        this.source.addListener("pause", () => {
+            //console.log("Stream Paused");
+        });
+        this.source.addListener("data", () => {
+            //console.log("Stream Data");
+        });
         //this.source.addListener("readable", () => console.log("YTDL Readable"));
         this.source.addListener("end", () => console.log("Stream End"));
-        this.source.addListener("resume", () => console.log("Stream Resume"));
+        this.source.addListener("resume", () => {
+            //console.log("Stream Resume");
+        });
 
     }
 

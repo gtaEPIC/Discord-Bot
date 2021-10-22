@@ -28,6 +28,8 @@ import PlayLastButton from "./Buttons/Music/PlayLastButton";
 import SetChannel from "./Commands/Music/SetChannel";
 import RollDice from "./Commands/Random/RollDice";
 import ReRoll from "./Buttons/Random/ReRoll";
+import CounterButton from "./Buttons/Random/Counter";
+import Counter from "./Commands/Random/Counter";
 
 export const commands: Array<Commands> = [
     new Play(),
@@ -43,7 +45,8 @@ export const commands: Array<Commands> = [
     new HistoryCommand(),
     new ClearQueue(),
     new SetChannel(),
-    new RollDice()
+    new RollDice(),
+    new Counter()
 ];
 export const buttons: Array<Buttons> = [
     new PreviousButton(),
@@ -56,7 +59,8 @@ export const buttons: Array<Buttons> = [
     new NowPlayingButton(),
     new PlayNextButton(),
     new PlayLastButton(),
-    new ReRoll()
+    new ReRoll(),
+    new CounterButton()
 ]
 export const selectMenus: Array<SelectMenu> = [
     new LoopMenu()

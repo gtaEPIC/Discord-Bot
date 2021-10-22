@@ -8,12 +8,19 @@ const standardGuildSettings: Array<SQLStandard> = [
     new SQLStandard({name: "Guild", type: types.TEXT, unique: true}),
     new SQLStandard({name: "Music_Channel", type: types.TEXT}),
 ];
+const standardCounter: Array<SQLStandard> = [
+    new SQLStandard({name: "Message", type: types.TEXT, unique: true}),
+    new SQLStandard({name: "Counter", type: types.INTEGER}),
+    new SQLStandard({name: "Shared", type: types.TEXT}),
+    new SQLStandard({name: "Content", type: types.TEXT})
+]
 
 export default async function (dest: string) {
     SQLCreate(dest);
     let db = await open(DBConfig);
     //await db.exec("INSERT INTO Shirts VALUES (2, 'n')");
     await checkTable("Guild_Settings", db, standardGuildSettings);
+    await checkTable("Counters", db, standardCounter);
 
 }
 

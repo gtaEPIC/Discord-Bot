@@ -27,6 +27,8 @@ var PlayLastButton_1 = require("./Buttons/Music/PlayLastButton");
 var SetChannel_1 = require("./Commands/Music/SetChannel");
 var RollDice_1 = require("./Commands/Random/RollDice");
 var ReRoll_1 = require("./Buttons/Random/ReRoll");
+var Counter_1 = require("./Buttons/Random/Counter");
+var Counter_2 = require("./Commands/Random/Counter");
 exports.commands = [
     new Play_1["default"](),
     new PlayNext_1["default"](),
@@ -41,7 +43,8 @@ exports.commands = [
     new HistoryCommand_1["default"](),
     new ClearQueue_1["default"](),
     new SetChannel_1["default"](),
-    new RollDice_1["default"]()
+    new RollDice_1["default"](),
+    new Counter_2["default"]()
 ];
 exports.buttons = [
     new PreviousButton_1["default"](),
@@ -54,7 +57,8 @@ exports.buttons = [
     new NowPlayingButton_1["default"](),
     new PlayNextButton_1["default"](),
     new PlayLastButton_1["default"](),
-    new ReRoll_1["default"]()
+    new ReRoll_1["default"](),
+    new Counter_1["default"]()
 ];
 exports.selectMenus = [
     new LoopMenu_1["default"]()

@@ -60,11 +60,17 @@ var Track = /** @class */ (function () {
         this.source.addListener("close", function () { return console.log("Stream Closed"); });
         this.source.addListener("error", function (err) { return console.error("Stream ERROR:", err); });
         this.source.addListener("error", (function (err) { return onError(err); }));
-        this.source.addListener("pause", function () { return console.log("Stream Paused"); });
-        this.source.addListener("data", function () { return console.log("Stream Data"); });
+        this.source.addListener("pause", function () {
+            //console.log("Stream Paused");
+        });
+        this.source.addListener("data", function () {
+            //console.log("Stream Data");
+        });
         //this.source.addListener("readable", () => console.log("YTDL Readable"));
         this.source.addListener("end", function () { return console.log("Stream End"); });
-        this.source.addListener("resume", function () { return console.log("Stream Resume"); });
+        this.source.addListener("resume", function () {
+            //console.log("Stream Resume");
+        });
     };
     Track.prototype.makeAnnouncement = function () {
         return __awaiter(this, void 0, void 0, function () {

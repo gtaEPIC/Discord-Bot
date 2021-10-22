@@ -98,7 +98,7 @@ export default class Queue {
         let track: Track = this.playing;
         //console.log("Time Check: ", Math.floor(oldState["playbackDuration"] / 1000), track.duration - 5)
         console.log("STATE CHANGE", oldState, newState, track);
-        if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Buffering && Math.floor(oldState["playbackDuration"] / 1000) <= track.duration - 1)
+        if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Buffering && Math.floor(oldState["playbackDuration"] / 1000) >= track.duration - 1)
             this.onEnd().then();
         else if (newState.status === AudioPlayerStatus.Idle)
             track.error({message: "Feed Stopped"}).then();

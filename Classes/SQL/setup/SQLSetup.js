@@ -44,6 +44,12 @@ var standardGuildSettings = [
     new SQLStandard_1["default"]({ name: "Guild", type: SQLStandard_1.types.TEXT, unique: true }),
     new SQLStandard_1["default"]({ name: "Music_Channel", type: SQLStandard_1.types.TEXT }),
 ];
+var standardCounter = [
+    new SQLStandard_1["default"]({ name: "Message", type: SQLStandard_1.types.TEXT, unique: true }),
+    new SQLStandard_1["default"]({ name: "Counter", type: SQLStandard_1.types.INTEGER }),
+    new SQLStandard_1["default"]({ name: "Shared", type: SQLStandard_1.types.TEXT }),
+    new SQLStandard_1["default"]({ name: "Content", type: SQLStandard_1.types.TEXT })
+];
 function default_1(dest) {
     return __awaiter(this, void 0, void 0, function () {
         var db;
@@ -58,6 +64,9 @@ function default_1(dest) {
                     return [4 /*yield*/, checkTable("Guild_Settings", db, standardGuildSettings)];
                 case 2:
                     //await db.exec("INSERT INTO Shirts VALUES (2, 'n')");
+                    _a.sent();
+                    return [4 /*yield*/, checkTable("Counters", db, standardCounter)];
+                case 3:
                     _a.sent();
                     return [2 /*return*/];
             }
