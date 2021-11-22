@@ -65,6 +65,7 @@ var Queue = /** @class */ (function () {
         //volume: number = 5;
         this.paused = false;
         this.loop = LoopModes.OFF;
+        this.skipping = false;
         this.player = player;
         this.guild = guild;
         this.voiceChannel = voice;
@@ -137,6 +138,11 @@ var Queue = /** @class */ (function () {
         var track = this.playing;
         //console.log("Time Check: ", Math.floor(oldState["playbackDuration"] / 1000), track.duration - 5)
         console.log("STATE CHANGE", oldState, newState, track);
+        if (this.skipping) {
+            this.skipping = false;
+            this.onEnd().then();
+            return;
+        }
         if (newState.status === voice_1.AudioPlayerStatus.Idle && oldState.status !== voice_1.AudioPlayerStatus.Buffering && Math.floor(oldState["playbackDuration"] / 1000) >= track.duration - 1)
             this.onEnd().then();
         else if (newState.status === voice_1.AudioPlayerStatus.Idle)
@@ -185,6 +191,7 @@ var Queue = /** @class */ (function () {
         }
     };
     Queue.prototype.skip = function () {
+        this.skipping = true;
         this.audioPlayer.stop();
     };
     Queue.prototype.stop = function () {

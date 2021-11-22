@@ -41,6 +41,7 @@ export default class Queue {
     loop: LoopModes = LoopModes.OFF;
     statedLoop: LoopModes;
     statedPause: boolean;
+    skipping: boolean = false;
 
     constructor(player: Player, guild: Guild, voice: VoiceChannel | StageChannel, textChannel?: TextChannel) {
         this.player = player;
@@ -98,6 +99,11 @@ export default class Queue {
         let track: Track = this.playing;
         //console.log("Time Check: ", Math.floor(oldState["playbackDuration"] / 1000), track.duration - 5)
         console.log("STATE CHANGE", oldState, newState, track);
+        if (this.skipping) {
+            this.skipping = false;
+            this.onEnd().then();
+            return;
+        }
         if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Buffering && Math.floor(oldState["playbackDuration"] / 1000) >= track.duration - 1)
             this.onEnd().then();
         else if (newState.status === AudioPlayerStatus.Idle)
@@ -137,6 +143,7 @@ export default class Queue {
     }
 
     skip() {
+        this.skipping = true;
         this.audioPlayer.stop();
     }
 
