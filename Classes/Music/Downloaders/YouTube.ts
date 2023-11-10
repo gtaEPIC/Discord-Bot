@@ -8,7 +8,8 @@ export default class YouTube extends Downloaders{
             filter: "audio",
             quality: "lowestaudio",
             begin: point,
-            highWaterMark: 1<<25
+            highWaterMark: 1<<25,
+            liveBuffer: 40000,
         })
     }
 }

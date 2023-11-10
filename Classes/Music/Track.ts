@@ -18,6 +18,7 @@ export default class Track {
     type: string;
     duration: number;
     queue: Queue;
+    live: boolean = false;
 
     sourceLink: string
     source: stream.Readable;
@@ -52,7 +53,8 @@ export default class Track {
     }
 
 
-    constructor(name: string, author: string, url: string, sourceLink: string, requested: GuildMember, duration: number, type: string, queue: Queue) {
+    constructor(name: string, author: string, url: string, sourceLink: string, requested: GuildMember, duration: number,
+                type: string, queue: Queue, live: boolean = false) {
         this.name = name;
         this.author = author;
         this.url = url;
@@ -61,6 +63,7 @@ export default class Track {
         this.duration = duration;
         this.type = type;
         this.queue = queue;
+        this.live = live;
     }
 
     async makeAnnouncement() {

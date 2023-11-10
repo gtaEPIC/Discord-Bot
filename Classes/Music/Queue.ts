@@ -104,7 +104,7 @@ export default class Queue {
             this.onEnd().then();
             return;
         }
-        if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Buffering && Math.floor(oldState["playbackDuration"] / 1000) >= track.duration - 1)
+        if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Buffering && (!track.live && Math.floor(oldState["playbackDuration"] / 1000) >= track.duration - 1))
             this.onEnd().then();
         else if (newState.status === AudioPlayerStatus.Idle)
             track.error({message: "Feed Stopped"}).then();
@@ -172,16 +172,21 @@ export default class Queue {
 
     getProgressBar(size: number, includeTimes: boolean): string {
         //size--;
-        let dot = Math.floor(this.getTime() / this.playing.duration * size);
-        let final = "**|";
-        for (let i = 0; i < size; i++) {
-            if (i <= dot) final += "🔸";
-            else final += "🔹"
+        if (!this.playing.live) {
+            let dot = Math.floor(this.getTime() / this.playing.duration * size);
+            let final = "**|";
+            for (let i = 0; i < size; i++) {
+                if (i <= dot) final += "🔸";
+                else final += "🔹"
+            }
+            final += "|** ";
+            if (this.getTime() === -1) includeTimes = false;
+            if (includeTimes) final += secondsToTime(this.getTime()) + "/" + secondsToTime(this.playing.duration);
+            return final;
+        }else{
+            if (includeTimes) return "🔴 | Live Stream";
+            else return "🔴";
         }
-        final += "|** ";
-        if (this.getTime() === -1) includeTimes = false;
-        if (includeTimes) final += secondsToTime(this.getTime()) + "/" + secondsToTime(this.playing.duration);
-        return final;
     }
 
     async onEnd() {
@@ -254,7 +259,8 @@ export default class Queue {
                         member,
                         parseInt(response.videoDetails.lengthSeconds),
                         "youtube",
-                        this
+                        this,
+                        response.videoDetails.isLiveContent
                     );
                 }
             }else if (request.includes("soundcloud") && scdl.isValidUrl(request)) {
