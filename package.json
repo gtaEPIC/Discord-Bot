@@ -17,6 +17,7 @@
     "@discordjs/rest": "^2.0.1",
     "@discordjs/voice": "^0.16.0",
     "@types/mongoose": "^5.11.97",
+    "@types/node": "^20.9.0",
     "@types/yt-search": "^2.10.3",
     "discord-api-types": "^0.37.63",
     "discord.js": "^14.13.0",
