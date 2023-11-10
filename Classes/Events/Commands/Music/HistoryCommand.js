@@ -67,35 +67,41 @@ var HistoryCommand = /** @class */ (function (_super) {
         var member = interaction.member;
         var queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
         var track = queue.playing;
-        var embed = new discord_js_1.MessageEmbed()
+        var embed = new discord_js_1.EmbedBuilder()
             .setTitle("History:")
             .setDescription((track) ? "Currently Playing **" + track.name + "**\nHistory:" : "Nothing is playing right now. Last tracks played:");
         //console.log(min, max, page)
         console.log(queue.history);
         for (var i = 0; i < queue.history.length; i++) {
             var song = queue.history[i];
-            embed.addField((i + 1) + ". " + song.name + " `(" + (0, Extras_1.secondsToTime)(song.duration) + ")`", "Author: " + song.author + "\n" +
-                "Was Requested By: <@" + song.requested.id + ">\n" +
-                "[Link](" + song.url + ")");
+            embed.addFields({
+                name: (i + 1) + ". " + song.name + " `(" + (0, Extras_1.secondsToTime)(song.duration) + ")`",
+                value: "Author: " + song.author + "\n" +
+                    "Was Requested By: <@" + song.requested.id + ">\n" +
+                    "[Link](" + song.url + ")"
+            });
         }
         if (queue.history.length === 0) {
-            embed.addField("Nothing is in the history", "Songs are added here after they are done playing.\n" +
-                "Use the `/rewind` command to go back to one of these songs.");
+            embed.addFields({
+                name: "Nothing is in the history",
+                value: "Songs are added here after they are done playing.\n" +
+                    "Use the `/rewind` command to go back to one of these songs."
+            });
         }
         return embed;
     };
-    HistoryCommand.prototype.execute = function (interaction, args) {
+    HistoryCommand.prototype.execute = function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
             var embed, refreshButton, actionRow;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         embed = this.getEmbed(interaction);
-                        refreshButton = new discord_js_1.MessageButton()
-                            .setStyle(1 /* PRIMARY */)
+                        refreshButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Primary)
                             .setLabel("🔄 | Refresh")
                             .setCustomId("history");
-                        actionRow = new discord_js_1.MessageActionRow({ components: [refreshButton] });
+                        actionRow = new discord_js_1.ActionRowBuilder({ components: [refreshButton] });
                         return [4 /*yield*/, interaction.reply({
                                 embeds: [embed],
                                 components: [actionRow]

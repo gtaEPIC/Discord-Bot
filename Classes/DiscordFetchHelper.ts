@@ -1,12 +1,10 @@
 import {
     Client,
     Guild,
-    GuildChannel,
-    ThreadChannel,
     Snowflake,
     TextChannel,
     Message,
-    GuildMember, User, TextBasedChannels, Channel
+    GuildMember, User, Channel
 } from "discord.js";
 
 export class DiscordFetchHelpers {
@@ -39,15 +37,15 @@ export class DiscordFetchHelpers {
      * @param client
      * @param id
      */
-    static async searchMessage(client: Client, id: Snowflake): Promise<Message | null> {
-        let final;
-        await Promise.all(client.guilds.cache.map((guild) => {
-            guild.channels.cache.map(async (channel:TextChannel) => {
-                if (channel.type === "GUILD_TEXT") {
-                    final = await this.findMessage(client, channel, id)
-                }
-            })
-        }))
-        return final;
-    }
+    // static async searchMessage(client: Client, id: Snowflake): Promise<Message | null> {
+    //     let final;
+    //     await Promise.all(client.guilds.cache.map((guild) => {
+    //         guild.channels.cache.map(async (channel:TextChannel) => {
+    //             if (channel.type === "GUILD_TEXT") {
+    //                 final = await this.findMessage(client, channel, id)
+    //             }
+    //         })
+    //     }))
+    //     return final;
+    // }
 }

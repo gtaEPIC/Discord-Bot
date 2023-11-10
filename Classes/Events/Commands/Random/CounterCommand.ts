@@ -1,50 +1,52 @@
 import Commands from "../Commands";
-import {CommandInteraction, GuildMember, Message, MessageActionRow, MessageButton} from "discord.js";
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, GuildMember, Message} from "discord.js";
 import {
     SlashCommandBooleanOption,
     SlashCommandBuilder,
     SlashCommandNumberOption,
     SlashCommandStringOption
 } from "@discordjs/builders";
-import {MessageButtonStyles} from "discord.js/typings/enums";
-import SQLCounters from "../../../SQL/SQLCounters";
+import Counter from "../../../Random/Counter";
 
-export default class Counter extends Commands {
+export default class CounterCommand extends Commands {
 
     commandName: string = "counter";
 
-    getButtons(): MessageActionRow {
-        return new MessageActionRow({
+
+    getButtons(): ActionRowBuilder {
+        return new ActionRowBuilder({
             components: [
-                new MessageButton()
-                    .setStyle(MessageButtonStyles.DANGER)
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Danger)
                     .setLabel("-1")
-                    .setCustomId("counter+=+-1"),
-                new MessageButton()
-                    .setStyle(MessageButtonStyles.PRIMARY)
+                    .setCustomId("counter+=+remove"),
+                new ButtonBuilder()
+                    .setStyle(ButtonStyle.Primary)
                     .setLabel("+1")
-                    .setCustomId("counter+=++1")
+                    .setCustomId("counter+=+add")
             ]
         })
     }
 
     async execute(interaction: CommandInteraction, args) {
-        let count = args["start-value"];
-        if (!count) count = 0;
         let member: GuildMember = <GuildMember>interaction.member
-        let message: Message = <Message>await interaction.reply({
-            content: args["content"] + ": " + count + "\n" + (!args["shared"] ? "Only <@" + member.id + "> can use this" :
-                "Anyone can use this"),
-            components: [this.getButtons()],
+        let content: string = args["content"];
+        let shared: boolean = args["shared"];
+        let startingNumber: number = args["start-value"] || 0;
+        let message: Message = <Message> await interaction.deferReply({
             fetchReply: true
+        });
+        let counter = await Counter.create((!shared ? member.id : null), content, message.id, startingNumber);
+        return interaction.followUp({
+            content: counter.toDiscordString(),
+            components: [counter.getButtons()],
         })
-        await SQLCounters.newCounter(message.id, count, args["content"], !args["shared"] ? member.id : null)
     }
 
     createCommand(): object {
         return new SlashCommandBuilder()
             .setName(this.commandName)
-            .setDescription("Rolls a dice")
+            .setDescription("Create a counter")
             .addStringOption(new SlashCommandStringOption()
                 .setName("content")
                 .setDescription("Content of the counter. TIP: Content already ends with (:)")

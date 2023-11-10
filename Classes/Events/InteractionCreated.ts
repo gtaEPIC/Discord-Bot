@@ -25,11 +25,10 @@ import SelectMenu from "./SelectMenu/SelectMenu";
 import LoopMenu from "./SelectMenu/Music/LoopMenu";
 import PlayNextButton from "./Buttons/Music/PlayNextButton";
 import PlayLastButton from "./Buttons/Music/PlayLastButton";
-import SetChannel from "./Commands/Music/SetChannel";
 import RollDice from "./Commands/Random/RollDice";
 import ReRoll from "./Buttons/Random/ReRoll";
-import CounterButton from "./Buttons/Random/Counter";
-import Counter from "./Commands/Random/Counter";
+import CounterButton from "./Buttons/Random/CounterButton";
+import CounterCommand from "./Commands/Random/CounterCommand";
 
 export const commands: Array<Commands> = [
     new Play(),
@@ -44,9 +43,8 @@ export const commands: Array<Commands> = [
     new QueueCommand(),
     new HistoryCommand(),
     new ClearQueue(),
-    new SetChannel(),
     new RollDice(),
-    new Counter()
+    new CounterCommand()
 ];
 export const buttons: Array<Buttons> = [
     new PreviousButton(),
@@ -89,7 +87,5 @@ export default function (interaction: Interaction) {
         for (let selectMenu of selectMenus) {
             if (selectMenu.selectName === interaction.customId) selectMenu.execute(interaction);
         }
-    }else if (interaction.isContextMenu()) {
-
     }
 }

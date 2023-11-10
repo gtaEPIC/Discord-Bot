@@ -56,7 +56,6 @@ var builders_1 = require("@discordjs/builders");
 var index_1 = require("../../../../index");
 var Play_1 = require("./Play");
 var Extras_1 = require("../../../Extras");
-var SQLMusicChannel_1 = require("../../../SQL/SQLMusicChannel");
 var PlayNext = /** @class */ (function (_super) {
     __extends(PlayNext, _super);
     function PlayNext() {
@@ -66,42 +65,35 @@ var PlayNext = /** @class */ (function (_super) {
     }
     PlayNext.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, _c, member, queue, replied, query;
-            var _d;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0: return [4 /*yield*/, (0, Extras_1.checkMusicChannel)(interaction.guild, interaction.channel.id)];
+            var member, queue, replied, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
                     case 1:
-                        if (!!(_e.sent())) return [3 /*break*/, 3];
-                        _b = (_a = interaction).reply;
-                        _d = {};
-                        _c = "❌ | Sorry, please use this command in <#";
-                        return [4 /*yield*/, SQLMusicChannel_1["default"].getMusicChannel(interaction.guild)];
-                    case 2: return [2 /*return*/, _b.apply(_a, [(_d.content = _c +
-                                (_e.sent()).id + ">", _d.ephemeral = true, _d)])];
-                    case 3: return [4 /*yield*/, (0, Extras_1.checkVC)(interaction)];
-                    case 4:
-                        if (_e.sent())
+                        // if (!await checkMusicChannel(interaction.guild, interaction.channel.id))
+                        //     return interaction.reply({content: "❌ | Sorry, please use this command in <#" +
+                        //             (await SQLMusicChannel.getMusicChannel(interaction.guild)).id + ">", ephemeral: true})
+                        if (_a.sent())
                             return [2 /*return*/];
                         member = interaction.member;
                         queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
-                        if (!(!queue.connection || !queue.playing)) return [3 /*break*/, 6];
+                        if (!(!queue.connection || !queue.playing)) return [3 /*break*/, 3];
                         return [4 /*yield*/, new Play_1["default"]().execute(interaction, args)];
-                    case 5:
-                        _e.sent();
-                        return [3 /*break*/, 9];
-                    case 6: return [4 /*yield*/, interaction.reply({
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 6];
+                    case 3: return [4 /*yield*/, interaction.reply({
                             content: "🔍 | Searching for song",
                             fetchReply: true
                         })];
-                    case 7:
-                        replied = (_e.sent());
+                    case 4:
+                        replied = (_a.sent());
                         query = args["query"];
                         return [4 /*yield*/, (0, Play_1.addSong)(queue, query, member, replied, true)];
-                    case 8:
-                        _e.sent();
-                        _e.label = 9;
-                    case 9: return [2 /*return*/];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [2 /*return*/];
                 }
             });
         });

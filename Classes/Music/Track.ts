@@ -1,16 +1,12 @@
 import {
+    ActionRowBuilder,
+    ButtonBuilder, ButtonStyle, EmbedBuilder,
     GuildMember,
-    Message,
-    MessageActionRow,
-    MessageButton,
-    MessageEmbed,
-    MessageOptions,
-    MessageSelectMenu
+    Message, MessageCreateOptions, SelectMenuBuilder
 } from "discord.js";
 import {AudioResource, createAudioPlayer, createAudioResource} from "@discordjs/voice";
 import * as stream from "stream";
 import Queue, {LoopModes} from "./Queue";
-import {MessageButtonStyles} from "discord.js/typings/enums";
 import YouTube from "./Downloaders/YouTube";
 import SoundCloud from "./Downloaders/SoundCloud";
 
@@ -69,24 +65,24 @@ export default class Track {
 
     async makeAnnouncement() {
         try {
-            let prevButton: MessageButton = new MessageButton()
-                .setStyle(MessageButtonStyles.SECONDARY)
+            let prevButton: ButtonBuilder = new ButtonBuilder()
+                .setStyle(ButtonStyle.Secondary)
                 .setLabel("⏮ Previous Track")
                 .setCustomId("previous")
                 .setDisabled(this.queue.history.length === 0);
-            let playPauseButton: MessageButton = new MessageButton()
-                .setStyle(MessageButtonStyles.PRIMARY)
+            let playPauseButton: ButtonBuilder = new ButtonBuilder()
+                .setStyle(ButtonStyle.Primary)
                 .setLabel("⏯ | " + (this.queue.paused ? "Play" : "Pause"))
                 .setCustomId((this.queue.paused ? "play" : "pause"));
-            let stopButton: MessageButton = new MessageButton()
-                .setStyle(MessageButtonStyles.DANGER)
+            let stopButton: ButtonBuilder = new ButtonBuilder()
+                .setStyle(ButtonStyle.Danger)
                 .setLabel("⏹ | Stop")
                 .setCustomId("stop");
-            let nextButton: MessageButton = new MessageButton()
-                .setStyle(MessageButtonStyles.SECONDARY)
+            let nextButton: ButtonBuilder = new ButtonBuilder()
+                .setStyle(ButtonStyle.Secondary)
                 .setLabel("⏭ | " + (this.queue.songs.length > 0 ? "Next Track" : "Skip"))
                 .setCustomId("skip");
-            let placeholder;
+            let placeholder: string
             switch (this.queue.loop) {
                 case LoopModes.OFF:
                     placeholder = "Loop Off";
@@ -101,7 +97,7 @@ export default class Track {
                     placeholder = "Loop Off";
                     break;
             }
-            let loopSelection: MessageSelectMenu = new MessageSelectMenu()
+            let loopSelection: SelectMenuBuilder = new SelectMenuBuilder()
                 .setCustomId("loop")
                 .addOptions([
                     {
@@ -130,8 +126,8 @@ export default class Track {
             let changedState: boolean = this.queue.statedLoop !== this.queue.loop || this.queue.statedPause !== this.queue.paused;
             this.queue.statedLoop = this.queue.loop;
             this.queue.statedPause = this.queue.paused;
-            let actionRow: MessageActionRow = new MessageActionRow({components: [prevButton, playPauseButton, stopButton, nextButton]});
-            let actionRow2: MessageActionRow = new MessageActionRow({components: [loopSelection]})
+            let actionRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder<ButtonBuilder>({components: [prevButton, playPauseButton, stopButton, nextButton]});
+            let actionRow2: ActionRowBuilder<SelectMenuBuilder> = new ActionRowBuilder<SelectMenuBuilder>({components: [loopSelection]})
             let track: Track = this.queue.playing;
             let first: boolean = this.announcement === undefined
             let message: string = (!this.queue.paused ? "🎶 | Now playing" : "⏸ | Paused on") + ` **${track.name}**!\n${this.queue.getProgressBar(20, !first)}`
@@ -184,22 +180,24 @@ export default class Track {
         let point: number = this.resource.playbackDuration - 1000;
         if (point < 0) point = 0;
         if (this.attempts >= this.maxAttempts) {
-            let playNextButton: MessageButton = new MessageButton()
-                .setStyle(MessageButtonStyles.PRIMARY)
+            let playNextButton: ButtonBuilder = new ButtonBuilder()
+                .setStyle(ButtonStyle.Primary)
                 .setLabel("Play Next")
                 .setCustomId("playnext+=+" + this.url);
-            let playLastButton: MessageButton = new MessageButton()
-                .setStyle(MessageButtonStyles.SECONDARY)
+            let playLastButton: ButtonBuilder = new ButtonBuilder()
+                .setStyle(ButtonStyle.Secondary)
                 .setLabel("Add to queue")
                 .setCustomId("playlast+=+" + this.url);
-            let actionRow: MessageActionRow = new MessageActionRow({components: [playNextButton, playLastButton]})
-            let details: MessageEmbed = new MessageEmbed()
+            let actionRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder<ButtonBuilder>({components: [playNextButton, playLastButton]})
+            let details: EmbedBuilder = new EmbedBuilder()
                 .setTitle("Error Details")
                 .setDescription("The song in the queue failed to play due to an error")
-                .addField("Message", err.message)
-                .addField("Song", "[" + this.name + "](" + this.url + ")")
-                .addField("Requested by", "<@" + this.requested.id + ">");
-            let contents: MessageOptions = {
+                .addFields([
+                    {name: "Message", value: err.message},
+                    {name: "Song", value: "[" + this.name + "](" + this.url + ")"},
+                    {name: "Requested by", value: "<@" + this.requested.id + ">"},
+                ])
+            let contents: MessageCreateOptions = {
                 content: "❌ | An error occurred while playing the song. Attempts: " + this.attempts + "/" + this.maxAttempts,
                 embeds: [details],
                 components: [actionRow]

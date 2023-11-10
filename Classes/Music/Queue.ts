@@ -63,7 +63,7 @@ export default class Queue {
         try {
             if (!this.connection) {
                 await replied.edit("🔈 | Attempting to join channel")
-                await this.connect()
+                this.connect()
             }
         } catch (e) {
             console.log(e);

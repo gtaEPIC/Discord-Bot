@@ -63,13 +63,15 @@ var RollDice = /** @class */ (function (_super) {
     }
     RollDice.prototype.rollDice = function (sides, interaction) {
         var random = Math.floor((Math.random() * (sides - 1)) + 1);
-        var reRoll = new discord_js_1.MessageButton()
-            .setStyle(1 /* PRIMARY */)
+        var reRoll = new discord_js_1.ButtonBuilder()
+            .setStyle(discord_js_1.ButtonStyle.Primary)
             .setLabel("Re-roll")
             .setCustomId("re-roll+=+" + sides);
+        var actionRow = new discord_js_1.ActionRowBuilder();
+        actionRow.addComponents(reRoll);
         return interaction.reply({
             content: "🎲 | You rolled a " + random + " on a " + sides + " sided dice.",
-            components: [new discord_js_1.MessageActionRow({ components: [reRoll] })]
+            components: [actionRow]
         });
     };
     RollDice.prototype.execute = function (interaction, args) {

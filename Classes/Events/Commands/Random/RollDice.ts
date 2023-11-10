@@ -1,7 +1,6 @@
 import Commands from "../Commands";
-import {ButtonInteraction, CommandInteraction, MessageActionRow, MessageButton} from "discord.js";
+import {ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction} from "discord.js";
 import {SlashCommandBuilder, SlashCommandNumberOption} from "@discordjs/builders";
-import {MessageButtonStyles} from "discord.js/typings/enums";
 
 export default class RollDice extends Commands {
 
@@ -9,13 +8,15 @@ export default class RollDice extends Commands {
 
     rollDice(sides: number, interaction: CommandInteraction | ButtonInteraction) {
         let random: number = Math.floor((Math.random() * (sides - 1)) + 1);
-        let reRoll: MessageButton = new MessageButton()
-            .setStyle(MessageButtonStyles.PRIMARY)
+        let reRoll: ButtonBuilder = new ButtonBuilder()
+            .setStyle(ButtonStyle.Primary)
             .setLabel("Re-roll")
             .setCustomId("re-roll+=+" + sides)
+        let actionRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder<ButtonBuilder>();
+        actionRow.addComponents(reRoll)
         return interaction.reply({
             content: "🎲 | You rolled a " + random + " on a " + sides + " sided dice.",
-            components: [new MessageActionRow({components: [reRoll]})]
+            components: [actionRow]
         })
     }
 

@@ -114,9 +114,19 @@ var Loop = /** @class */ (function (_super) {
             .addStringOption(new builders_1.SlashCommandStringOption()
             .setName("state")
             .setDescription("The state the loop should be in")
-            .addChoice("Off", "off")
-            .addChoice("Loop Song", "loop1")
-            .addChoice("Loop Queue", "loopQ")
+            // .addChoice("Off", "off")
+            // .addChoice("Loop Song", "loop1")
+            // .addChoice("Loop Queue", "loopQ")
+            .addChoices({
+            name: "Off",
+            value: "off"
+        }, {
+            name: "Loop Song",
+            value: "loop1"
+        }, {
+            name: "Loop Queue",
+            value: "loopQ"
+        })
             .setRequired(true));
     };
     return Loop;

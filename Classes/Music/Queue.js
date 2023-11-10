@@ -87,25 +87,23 @@ var Queue = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 4, , 6]);
-                        if (!!this.connection) return [3 /*break*/, 3];
+                        _a.trys.push([0, 3, , 5]);
+                        if (!!this.connection) return [3 /*break*/, 2];
                         return [4 /*yield*/, replied.edit("🔈 | Attempting to join channel")];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.connect()];
-                    case 2:
-                        _a.sent();
-                        _a.label = 3;
-                    case 3: return [3 /*break*/, 6];
-                    case 4:
+                        this.connect();
+                        _a.label = 2;
+                    case 2: return [3 /*break*/, 5];
+                    case 3:
                         e_1 = _a.sent();
                         console.log(e_1);
                         return [4 /*yield*/, replied.edit({ content: "❌ | An error occurred while attempting to join!" })];
-                    case 5:
+                    case 4:
                         _a.sent();
                         this["delete"]();
                         return [2 /*return*/];
-                    case 6: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });

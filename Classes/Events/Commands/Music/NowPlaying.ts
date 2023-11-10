@@ -1,52 +1,51 @@
 import Commands from "../Commands";
 import {
-    CommandInteraction,
+    ActionRowBuilder,
+    ButtonBuilder, ButtonStyle,
+    CommandInteraction, EmbedBuilder,
     GuildMember,
     Interaction,
-    MessageActionRow,
-    MessageButton,
-    MessageEmbed,
     TextChannel
 } from "discord.js";
-import {Embed, SlashCommandBuilder} from "@discordjs/builders";
-import {checkVC} from "../../../Extras";
+import { SlashCommandBuilder} from "@discordjs/builders";
 import {player} from "../../../../index";
 import Queue from "../../../Music/Queue";
 import Track from "../../../Music/Track";
-import {MessageButtonStyles} from "discord.js/typings/enums";
 
 export default class NowPlaying extends Commands {
 
     commandName: string = "now-playing";
 
-    getEmbed(interaction: Interaction): MessageEmbed {
+    getEmbed(interaction: Interaction): EmbedBuilder {
         let member: GuildMember = <GuildMember>interaction.member
         let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
         let track: Track = queue.playing;
-        let embed: MessageEmbed;
+        let embed: EmbedBuilder;
         if (track) {
-            embed = new MessageEmbed()
+            embed = new EmbedBuilder()
                 .setTitle("Now Playing:")
                 .setDescription("**[" + track.name + "](" + track.url + ")**")
-                .addField("Author",track.author)
-                .addField("Progress",queue.getProgressBar(10, true))
-                .setFooter("Requested by " + track.requested.user.username, track.requested.displayAvatarURL())
+                .addFields({name: "Author", value: track.author, inline: true}, {name: "Progress", value: queue.getProgressBar(10, true), inline: true})
+                .setFooter({
+                    text: "Requested by " + track.requested.user.username,
+                    iconURL: track.requested.displayAvatarURL()
+                })
         }else{
-            embed = new MessageEmbed()
+            embed = new EmbedBuilder()
                 .setTitle("Nothing is playing")
                 .setDescription("Use the `/play` command to add a song");
         }
         return embed
     }
 
-    async execute(interaction: CommandInteraction, args) {
+    async execute(interaction: CommandInteraction,) {
         //if (await checkVC(interaction)) return;
-        let embed: MessageEmbed = this.getEmbed(interaction);
-        let refreshButton: MessageButton = new MessageButton()
-            .setStyle(MessageButtonStyles.PRIMARY)
+        let embed: EmbedBuilder = this.getEmbed(<Interaction>interaction);
+        let refreshButton: ButtonBuilder = new ButtonBuilder()
+            .setStyle(ButtonStyle.Primary)
             .setLabel("🔄 | Refresh")
             .setCustomId("nowplaying");
-        let actionRow: MessageActionRow = new MessageActionRow({components: [refreshButton]})
+        let actionRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder<ButtonBuilder>({components: [refreshButton]})
         await interaction.reply({
             embeds: [embed],
             components: [actionRow]

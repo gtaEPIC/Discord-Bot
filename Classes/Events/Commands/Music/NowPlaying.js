@@ -68,32 +68,34 @@ var NowPlaying = /** @class */ (function (_super) {
         var track = queue.playing;
         var embed;
         if (track) {
-            embed = new discord_js_1.MessageEmbed()
+            embed = new discord_js_1.EmbedBuilder()
                 .setTitle("Now Playing:")
                 .setDescription("**[" + track.name + "](" + track.url + ")**")
-                .addField("Author", track.author)
-                .addField("Progress", queue.getProgressBar(10, true))
-                .setFooter("Requested by " + track.requested.user.username, track.requested.displayAvatarURL());
+                .addFields({ name: "Author", value: track.author, inline: true }, { name: "Progress", value: queue.getProgressBar(10, true), inline: true })
+                .setFooter({
+                text: "Requested by " + track.requested.user.username,
+                iconURL: track.requested.displayAvatarURL()
+            });
         }
         else {
-            embed = new discord_js_1.MessageEmbed()
+            embed = new discord_js_1.EmbedBuilder()
                 .setTitle("Nothing is playing")
                 .setDescription("Use the `/play` command to add a song");
         }
         return embed;
     };
-    NowPlaying.prototype.execute = function (interaction, args) {
+    NowPlaying.prototype.execute = function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
             var embed, refreshButton, actionRow;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         embed = this.getEmbed(interaction);
-                        refreshButton = new discord_js_1.MessageButton()
-                            .setStyle(1 /* PRIMARY */)
+                        refreshButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Primary)
                             .setLabel("🔄 | Refresh")
                             .setCustomId("nowplaying");
-                        actionRow = new discord_js_1.MessageActionRow({ components: [refreshButton] });
+                        actionRow = new discord_js_1.ActionRowBuilder({ components: [refreshButton] });
                         return [4 /*yield*/, interaction.reply({
                                 embeds: [embed],
                                 components: [actionRow]

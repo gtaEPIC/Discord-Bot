@@ -54,58 +54,58 @@ exports.__esModule = true;
 var Commands_1 = require("../Commands");
 var discord_js_1 = require("discord.js");
 var builders_1 = require("@discordjs/builders");
-var SQLCounters_1 = require("../../../SQL/SQLCounters");
-var Counter = /** @class */ (function (_super) {
-    __extends(Counter, _super);
-    function Counter() {
+var Counter_1 = require("../../../Random/Counter");
+var CounterCommand = /** @class */ (function (_super) {
+    __extends(CounterCommand, _super);
+    function CounterCommand() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.commandName = "counter";
         return _this;
     }
-    Counter.prototype.getButtons = function () {
-        return new discord_js_1.MessageActionRow({
+    CounterCommand.prototype.getButtons = function () {
+        return new discord_js_1.ActionRowBuilder({
             components: [
-                new discord_js_1.MessageButton()
-                    .setStyle(4 /* DANGER */)
+                new discord_js_1.ButtonBuilder()
+                    .setStyle(discord_js_1.ButtonStyle.Danger)
                     .setLabel("-1")
-                    .setCustomId("counter+=+-1"),
-                new discord_js_1.MessageButton()
-                    .setStyle(1 /* PRIMARY */)
+                    .setCustomId("counter+=+remove"),
+                new discord_js_1.ButtonBuilder()
+                    .setStyle(discord_js_1.ButtonStyle.Primary)
                     .setLabel("+1")
-                    .setCustomId("counter+=++1")
+                    .setCustomId("counter+=+add")
             ]
         });
     };
-    Counter.prototype.execute = function (interaction, args) {
+    CounterCommand.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var count, member, message;
+            var member, content, shared, startingNumber, message, counter;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        count = args["start-value"];
-                        if (!count)
-                            count = 0;
                         member = interaction.member;
-                        return [4 /*yield*/, interaction.reply({
-                                content: args["content"] + ": " + count + "\n" + (!args["shared"] ? "Only <@" + member.id + "> can use this" :
-                                    "Anyone can use this"),
-                                components: [this.getButtons()],
+                        content = args["content"];
+                        shared = args["shared"];
+                        startingNumber = args["start-value"] || 0;
+                        return [4 /*yield*/, interaction.deferReply({
                                 fetchReply: true
                             })];
                     case 1:
                         message = _a.sent();
-                        return [4 /*yield*/, SQLCounters_1["default"].newCounter(message.id, count, args["content"], !args["shared"] ? member.id : null)];
+                        return [4 /*yield*/, Counter_1["default"].create((!shared ? member.id : null), content, message.id, startingNumber)];
                     case 2:
-                        _a.sent();
-                        return [2 /*return*/];
+                        counter = _a.sent();
+                        return [2 /*return*/, interaction.followUp({
+                                content: counter.toDiscordString(),
+                                components: [counter.getButtons()]
+                            })];
                 }
             });
         });
     };
-    Counter.prototype.createCommand = function () {
+    CounterCommand.prototype.createCommand = function () {
         return new builders_1.SlashCommandBuilder()
             .setName(this.commandName)
-            .setDescription("Rolls a dice")
+            .setDescription("Create a counter")
             .addStringOption(new builders_1.SlashCommandStringOption()
             .setName("content")
             .setDescription("Content of the counter. TIP: Content already ends with (:)")
@@ -117,7 +117,7 @@ var Counter = /** @class */ (function (_super) {
             .setDescription("The starting value of the counter. Default: 0")
             .setRequired(false));
     };
-    return Counter;
+    return CounterCommand;
 }(Commands_1["default"]));
-exports["default"] = Counter;
-//# sourceMappingURL=Counter.js.map
+exports["default"] = CounterCommand;
+//# sourceMappingURL=CounterCommand.js.map

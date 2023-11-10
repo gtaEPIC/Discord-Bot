@@ -1,11 +1,10 @@
 import Commands from "../Commands";
 import {
-    CommandInteraction,
+    ActionRowBuilder,
+    ButtonBuilder, ButtonStyle,
+    CommandInteraction, EmbedBuilder,
     GuildMember,
     Interaction,
-    MessageActionRow,
-    MessageButton,
-    MessageEmbed,
     TextChannel
 } from "discord.js";
 import {SlashCommandBuilder, SlashCommandIntegerOption} from "@discordjs/builders";
@@ -13,17 +12,16 @@ import {secondsToTime} from "../../../Extras";
 import {player} from "../../../../index";
 import Queue from "../../../Music/Queue";
 import Track from "../../../Music/Track";
-import {MessageButtonStyles} from "discord.js/typings/enums";
 
 export default class QueueCommand extends Commands {
 
     commandName: string = "queue";
 
-    getEmbed(interaction: Interaction, args): MessageEmbed {
+    getEmbed(interaction: Interaction, args): EmbedBuilder {
         let member: GuildMember = <GuildMember>interaction.member
         let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
         let track: Track = queue.playing;
-        let embed: MessageEmbed = new MessageEmbed()
+        let embed: EmbedBuilder = new EmbedBuilder()
             .setTitle("Queue:")
             .setDescription((track) ? "Currently Playing **" + track.name + "**\nNext Songs:" : "Nothing is playing right now.");
         let page: number = args["page"];
@@ -35,16 +33,22 @@ export default class QueueCommand extends Commands {
         //console.log(min, max, page)
         for (let i = min; i < max; i++) {
             let song: Track = queue.songs[i];
-            embed.addField((i + 1) + ". " + song.name + " `(" + secondsToTime(song.duration) + ")`",
-                "Author: " + song.author + "\n" +
-                "[Link](" + song.url + ")\n" +
-                "Requested By: <@" + song.requested.id + ">");
+            embed.addFields({
+                name: (i + 1) + ". " + song.name + " `(" + secondsToTime(song.duration) + ")`",
+                value: "Author: " + song.author + "\n" + "[Link](" + song.url + ")\n" + "Requested By: <@" + song.requested.id + ">"
+            })
         }
         if (max === 0) {
-            embed.addField("Nothing is in the queue", "There are no tracks in the queue.")
+            embed.addFields({
+                name: "Nothing is in the queue",
+                value: "There are no tracks in the queue."
+            })
         }
         let totalPages = Math.floor(queue.songs.length / 5) + 1;
-        embed.setFooter("Page " + page + "/" + totalPages);
+        // embed.setFooter("Page " + page + "/" + totalPages);
+        embed.setFooter({
+            text: "Page " + page + "/" + totalPages
+        })
         return embed;
     }
     getButtons(interaction: Interaction, args) {
@@ -53,27 +57,27 @@ export default class QueueCommand extends Commands {
         let totalPages = Math.floor(queue.songs.length / 5) + 1;
         let page: number = args["page"];
         if (!page || page < 1) page = 1;
-        let previousButton: MessageButton = new MessageButton()
-            .setStyle(MessageButtonStyles.SECONDARY)
+        let previousButton: ButtonBuilder = new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary)
             .setLabel("⬅ | Previous Page")
             .setCustomId("queue+=+" + (page - 1))
             .setDisabled(page === 1);
-        let refreshButton: MessageButton = new MessageButton()
-            .setStyle(MessageButtonStyles.PRIMARY)
+        let refreshButton: ButtonBuilder = new ButtonBuilder()
+            .setStyle(ButtonStyle.Primary)
             .setLabel("🔄 | Refresh")
             .setCustomId("queue+=+" + page);
-        let nextButton: MessageButton = new MessageButton()
-            .setStyle(MessageButtonStyles.SECONDARY)
+        let nextButton: ButtonBuilder = new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary)
             .setLabel("➡ | Next Page")
             .setCustomId("queue+=+" + (page + 1))
             .setDisabled(page >= totalPages);
-        return new MessageActionRow({components: [previousButton, refreshButton, nextButton]})
+        return new ActionRowBuilder<ButtonBuilder>({components: [previousButton, refreshButton, nextButton]})
     }
 
     async execute(interaction: CommandInteraction, args) {
         //if (await checkVC(interaction)) return;
-        let embed: MessageEmbed = this.getEmbed(interaction, args);
-        let actionRow: MessageActionRow = this.getButtons(interaction, args)
+        let embed: EmbedBuilder = this.getEmbed(<Interaction>interaction, args);
+        let actionRow: ActionRowBuilder<ButtonBuilder> = this.getButtons(<Interaction>interaction, args)
         await interaction.reply({
             embeds: [embed],
             components: [actionRow]

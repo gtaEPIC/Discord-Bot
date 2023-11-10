@@ -67,7 +67,7 @@ var QueueCommand = /** @class */ (function (_super) {
         var member = interaction.member;
         var queue = index_1.player.createQueue(interaction.guild, member.voice.channel, interaction.channel);
         var track = queue.playing;
-        var embed = new discord_js_1.MessageEmbed()
+        var embed = new discord_js_1.EmbedBuilder()
             .setTitle("Queue:")
             .setDescription((track) ? "Currently Playing **" + track.name + "**\nNext Songs:" : "Nothing is playing right now.");
         var page = args["page"];
@@ -82,15 +82,22 @@ var QueueCommand = /** @class */ (function (_super) {
         //console.log(min, max, page)
         for (var i = min; i < max; i++) {
             var song = queue.songs[i];
-            embed.addField((i + 1) + ". " + song.name + " `(" + (0, Extras_1.secondsToTime)(song.duration) + ")`", "Author: " + song.author + "\n" +
-                "[Link](" + song.url + ")\n" +
-                "Requested By: <@" + song.requested.id + ">");
+            embed.addFields({
+                name: (i + 1) + ". " + song.name + " `(" + (0, Extras_1.secondsToTime)(song.duration) + ")`",
+                value: "Author: " + song.author + "\n" + "[Link](" + song.url + ")\n" + "Requested By: <@" + song.requested.id + ">"
+            });
         }
         if (max === 0) {
-            embed.addField("Nothing is in the queue", "There are no tracks in the queue.");
+            embed.addFields({
+                name: "Nothing is in the queue",
+                value: "There are no tracks in the queue."
+            });
         }
         var totalPages = Math.floor(queue.songs.length / 5) + 1;
-        embed.setFooter("Page " + page + "/" + totalPages);
+        // embed.setFooter("Page " + page + "/" + totalPages);
+        embed.setFooter({
+            text: "Page " + page + "/" + totalPages
+        });
         return embed;
     };
     QueueCommand.prototype.getButtons = function (interaction, args) {
@@ -100,21 +107,21 @@ var QueueCommand = /** @class */ (function (_super) {
         var page = args["page"];
         if (!page || page < 1)
             page = 1;
-        var previousButton = new discord_js_1.MessageButton()
-            .setStyle(2 /* SECONDARY */)
+        var previousButton = new discord_js_1.ButtonBuilder()
+            .setStyle(discord_js_1.ButtonStyle.Secondary)
             .setLabel("⬅ | Previous Page")
             .setCustomId("queue+=+" + (page - 1))
             .setDisabled(page === 1);
-        var refreshButton = new discord_js_1.MessageButton()
-            .setStyle(1 /* PRIMARY */)
+        var refreshButton = new discord_js_1.ButtonBuilder()
+            .setStyle(discord_js_1.ButtonStyle.Primary)
             .setLabel("🔄 | Refresh")
             .setCustomId("queue+=+" + page);
-        var nextButton = new discord_js_1.MessageButton()
-            .setStyle(2 /* SECONDARY */)
+        var nextButton = new discord_js_1.ButtonBuilder()
+            .setStyle(discord_js_1.ButtonStyle.Secondary)
             .setLabel("➡ | Next Page")
             .setCustomId("queue+=+" + (page + 1))
             .setDisabled(page >= totalPages);
-        return new discord_js_1.MessageActionRow({ components: [previousButton, refreshButton, nextButton] });
+        return new discord_js_1.ActionRowBuilder({ components: [previousButton, refreshButton, nextButton] });
     };
     QueueCommand.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {

@@ -36,125 +36,136 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var sqlite_1 = require("sqlite");
-var Extras_1 = require("../Extras");
-var sqlite3 = require('sqlite3').verbose();
-var SQLCounters = /** @class */ (function () {
-    function SQLCounters() {
+exports.CounterModel = void 0;
+var mongoose_1 = require("mongoose");
+var discord_js_1 = require("discord.js");
+var CounterSchema = new mongoose_1["default"].Schema({
+    _id: mongoose_1["default"].Types.ObjectId,
+    seq: Number,
+    owner: String,
+    content: String,
+    messageID: String
+});
+exports.CounterModel = mongoose_1["default"].model('Counter', CounterSchema);
+var Counter = /** @class */ (function () {
+    function Counter(data) {
+        this._id = data._id;
+        this.content = data.content;
+        this.messageID = data.messageID;
+        this.owner = data.owner;
+        this.seq = data.seq;
     }
-    SQLCounters.getCounter = function (message) {
+    Counter.create = function (owner, content, messageID, startingNumber) {
+        if (startingNumber === void 0) { startingNumber = 0; }
         return __awaiter(this, void 0, void 0, function () {
-            var db, result;
+            var counter;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, sqlite_1.open)(Extras_1.DBConfig)];
+                    case 0:
+                        counter = new Counter({
+                            _id: null,
+                            seq: startingNumber,
+                            owner: owner,
+                            content: content,
+                            messageID: messageID
+                        });
+                        return [4 /*yield*/, counter.save()];
                     case 1:
-                        db = _a.sent();
-                        return [4 /*yield*/, db.get('SELECT * FROM Counters WHERE Message = ?', message)];
-                    case 2:
-                        result = _a.sent();
-                        if (!result)
-                            return [2 /*return*/, null];
-                        return [2 /*return*/, result.Counter];
-                }
-            });
-        });
-    };
-    SQLCounters.getOwner = function (message) {
-        return __awaiter(this, void 0, void 0, function () {
-            var db, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, sqlite_1.open)(Extras_1.DBConfig)];
-                    case 1:
-                        db = _a.sent();
-                        return [4 /*yield*/, db.get('SELECT * FROM Counters WHERE Message = ?', message)];
-                    case 2:
-                        result = _a.sent();
-                        if (!result)
-                            return [2 /*return*/, null];
-                        return [2 /*return*/, result.Shared];
-                }
-            });
-        });
-    };
-    SQLCounters.getContent = function (message) {
-        return __awaiter(this, void 0, void 0, function () {
-            var db, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, sqlite_1.open)(Extras_1.DBConfig)];
-                    case 1:
-                        db = _a.sent();
-                        return [4 /*yield*/, db.get('SELECT * FROM Counters WHERE Message = ?', message)];
-                    case 2:
-                        result = _a.sent();
-                        if (!result)
-                            return [2 /*return*/, null];
-                        return [2 /*return*/, result.Content];
-                }
-            });
-        });
-    };
-    SQLCounters.hasCounter = function (message) {
-        return __awaiter(this, void 0, void 0, function () {
-            var db, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, sqlite_1.open)(Extras_1.DBConfig)];
-                    case 1:
-                        db = _a.sent();
-                        return [4 /*yield*/, db.get('SELECT * FROM Counters WHERE Message = ?', message)];
-                    case 2:
-                        result = _a.sent();
-                        return [2 /*return*/, result != undefined];
-                }
-            });
-        });
-    };
-    SQLCounters.setCounter = function (oldMessage, message, counter) {
-        return __awaiter(this, void 0, void 0, function () {
-            var db;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, sqlite_1.open)(Extras_1.DBConfig)];
-                    case 1:
-                        db = _a.sent();
-                        return [4 /*yield*/, this.hasCounter(oldMessage)];
-                    case 2:
-                        if (!_a.sent()) return [3 /*break*/, 4];
-                        return [4 /*yield*/, db.run('UPDATE Counters SET Message = ?, Counter = ? WHERE Message = ?', message, counter, oldMessage)];
-                    case 3:
                         _a.sent();
-                        return [3 /*break*/, 5];
-                    case 4: throw new Error("Counter doesn't exist");
-                    case 5: return [2 /*return*/];
+                        return [2 /*return*/, counter];
                 }
             });
         });
     };
-    SQLCounters.newCounter = function (message, counter, content, shared) {
+    Counter.prototype.save = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var db;
+            var newModel;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, sqlite_1.open)(Extras_1.DBConfig)];
+                    case 0:
+                        newModel = new exports.CounterModel(this);
+                        if (!this._id) {
+                            newModel.isNew = true;
+                            newModel._id = new mongoose_1["default"].Types.ObjectId();
+                        }
+                        else {
+                            newModel.isNew = false;
+                        }
+                        return [4 /*yield*/, newModel.save()];
                     case 1:
-                        db = _a.sent();
-                        return [4 /*yield*/, this.hasCounter(message)];
-                    case 2:
-                        if (!!(_a.sent())) return [3 /*break*/, 4];
-                        return [4 /*yield*/, db.run('INSERT INTO Counters VALUES (?,?,?,?)', message, counter, shared, content)];
-                    case 3:
                         _a.sent();
-                        return [3 /*break*/, 5];
-                    case 4: throw new Error("Counter already exist");
-                    case 5: return [2 /*return*/];
+                        this._id = newModel._id;
+                        return [2 /*return*/];
                 }
             });
         });
     };
-    return SQLCounters;
+    Counter.fetchById = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var model;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, exports.CounterModel.findById(id)];
+                    case 1:
+                        model = _a.sent();
+                        return [2 /*return*/, new Counter(model)];
+                }
+            });
+        });
+    };
+    Counter.fetchByDiscordMessageId = function (messageId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var model;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, exports.CounterModel.findOne({ messageID: messageId })];
+                    case 1:
+                        model = _a.sent();
+                        return [2 /*return*/, new Counter(model)];
+                }
+            });
+        });
+    };
+    Counter.prototype.increment = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.seq++;
+                        return [4 /*yield*/, this.save()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Counter.prototype.decrement = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.seq--;
+                        return [4 /*yield*/, this.save()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Counter.prototype.toDiscordString = function () {
+        return this.content + ": " + this.seq + "\n" + (this.owner ? "Only <@" + this.owner + "> can use this" :
+            "Anyone can use this");
+    };
+    Counter.prototype.getButtons = function () {
+        var actionRow = new discord_js_1.ActionRowBuilder();
+        var addButton = new discord_js_1.ButtonBuilder().setStyle(discord_js_1.ButtonStyle.Primary).setCustomId("counter+=+add").setLabel("+1");
+        var removeButton = new discord_js_1.ButtonBuilder().setStyle(discord_js_1.ButtonStyle.Danger).setCustomId("counter+=+remove").setLabel("-1");
+        actionRow.addComponents(addButton, removeButton);
+        return actionRow;
+    };
+    return Counter;
 }());
-exports["default"] = SQLCounters;
-//# sourceMappingURL=SQLCounters.js.map
+exports["default"] = Counter;
+//# sourceMappingURL=Counter.js.map

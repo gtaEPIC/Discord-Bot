@@ -43,9 +43,19 @@ export default class Loop extends Commands {
             .addStringOption(new SlashCommandStringOption()
                 .setName("state")
                 .setDescription("The state the loop should be in")
-                .addChoice("Off", "off")
-                .addChoice("Loop Song", "loop1")
-                .addChoice("Loop Queue", "loopQ")
+                // .addChoice("Off", "off")
+                // .addChoice("Loop Song", "loop1")
+                // .addChoice("Loop Queue", "loopQ")
+                .addChoices({
+                    name: "Off",
+                    value: "off"
+                },{
+                    name: "Loop Song",
+                    value: "loop1"
+                }, {
+                    name: "Loop Queue",
+                    value: "loopQ"
+                })
                 .setRequired(true)
             )
     }

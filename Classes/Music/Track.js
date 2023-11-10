@@ -79,21 +79,21 @@ var Track = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 7, , 8]);
-                        prevButton = new discord_js_1.MessageButton()
-                            .setStyle(2 /* SECONDARY */)
+                        prevButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Secondary)
                             .setLabel("⏮ Previous Track")
                             .setCustomId("previous")
                             .setDisabled(this.queue.history.length === 0);
-                        playPauseButton = new discord_js_1.MessageButton()
-                            .setStyle(1 /* PRIMARY */)
+                        playPauseButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Primary)
                             .setLabel("⏯ | " + (this.queue.paused ? "Play" : "Pause"))
                             .setCustomId((this.queue.paused ? "play" : "pause"));
-                        stopButton = new discord_js_1.MessageButton()
-                            .setStyle(4 /* DANGER */)
+                        stopButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Danger)
                             .setLabel("⏹ | Stop")
                             .setCustomId("stop");
-                        nextButton = new discord_js_1.MessageButton()
-                            .setStyle(2 /* SECONDARY */)
+                        nextButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Secondary)
                             .setLabel("⏭ | " + (this.queue.songs.length > 0 ? "Next Track" : "Skip"))
                             .setCustomId("skip");
                         placeholder = void 0;
@@ -111,7 +111,7 @@ var Track = /** @class */ (function () {
                                 placeholder = "Loop Off";
                                 break;
                         }
-                        loopSelection = new discord_js_1.MessageSelectMenu()
+                        loopSelection = new discord_js_1.SelectMenuBuilder()
                             .setCustomId("loop")
                             .addOptions([
                             {
@@ -139,11 +139,11 @@ var Track = /** @class */ (function () {
                         changedState = this.queue.statedLoop !== this.queue.loop || this.queue.statedPause !== this.queue.paused;
                         this.queue.statedLoop = this.queue.loop;
                         this.queue.statedPause = this.queue.paused;
-                        actionRow = new discord_js_1.MessageActionRow({ components: [prevButton, playPauseButton, stopButton, nextButton] });
-                        actionRow2 = new discord_js_1.MessageActionRow({ components: [loopSelection] });
+                        actionRow = new discord_js_1.ActionRowBuilder({ components: [prevButton, playPauseButton, stopButton, nextButton] });
+                        actionRow2 = new discord_js_1.ActionRowBuilder({ components: [loopSelection] });
                         track = this.queue.playing;
                         first = this.announcement === undefined;
-                        message = (!this.queue.paused ? "🎶 | Now playing" : "⏸ | Paused on") + (" **" + track.name + "**!\n" + this.queue.getProgressBar(20, !first));
+                        message = (!this.queue.paused ? "🎶 | Now playing" : "⏸ | Paused on") + " **".concat(track.name, "**!\n").concat(this.queue.getProgressBar(20, !first));
                         if (this.attempts > 1) {
                             message += "\n⚠ | An issue occurred trying to play the audio. Trying again. (Attempt " + track.attempts + "/" + this.maxAttempts + ")";
                         }
@@ -236,21 +236,23 @@ var Track = /** @class */ (function () {
                         if (point < 0)
                             point = 0;
                         if (!(this.attempts >= this.maxAttempts)) return [3 /*break*/, 2];
-                        playNextButton = new discord_js_1.MessageButton()
-                            .setStyle(1 /* PRIMARY */)
+                        playNextButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Primary)
                             .setLabel("Play Next")
                             .setCustomId("playnext+=+" + this.url);
-                        playLastButton = new discord_js_1.MessageButton()
-                            .setStyle(2 /* SECONDARY */)
+                        playLastButton = new discord_js_1.ButtonBuilder()
+                            .setStyle(discord_js_1.ButtonStyle.Secondary)
                             .setLabel("Add to queue")
                             .setCustomId("playlast+=+" + this.url);
-                        actionRow = new discord_js_1.MessageActionRow({ components: [playNextButton, playLastButton] });
-                        details = new discord_js_1.MessageEmbed()
+                        actionRow = new discord_js_1.ActionRowBuilder({ components: [playNextButton, playLastButton] });
+                        details = new discord_js_1.EmbedBuilder()
                             .setTitle("Error Details")
                             .setDescription("The song in the queue failed to play due to an error")
-                            .addField("Message", err.message)
-                            .addField("Song", "[" + this.name + "](" + this.url + ")")
-                            .addField("Requested by", "<@" + this.requested.id + ">");
+                            .addFields([
+                            { name: "Message", value: err.message },
+                            { name: "Song", value: "[" + this.name + "](" + this.url + ")" },
+                            { name: "Requested by", value: "<@" + this.requested.id + ">" },
+                        ]);
                         contents = {
                             content: "❌ | An error occurred while playing the song. Attempts: " + this.attempts + "/" + this.maxAttempts,
                             embeds: [details],

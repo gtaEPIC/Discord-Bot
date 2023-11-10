@@ -52,8 +52,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var Buttons_1 = require("../Buttons");
-var SQLCounters_1 = require("../../../SQL/SQLCounters");
-var Counter_1 = require("../../Commands/Random/Counter");
+var Counter_1 = require("../../../Random/Counter");
 var CounterButton = /** @class */ (function (_super) {
     __extends(CounterButton, _super);
     function CounterButton() {
@@ -63,48 +62,56 @@ var CounterButton = /** @class */ (function (_super) {
     }
     CounterButton.prototype.execute = function (interaction, args) {
         return __awaiter(this, void 0, void 0, function () {
-            var interacted, owner, count, message, _a, _b;
-            var _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var interacted, counter, newMessage;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         interacted = interaction.message;
-                        return [4 /*yield*/, SQLCounters_1["default"].getOwner(interacted.id)];
+                        return [4 /*yield*/, Counter_1["default"].fetchByDiscordMessageId(interacted.id)];
                     case 1:
-                        owner = _d.sent();
-                        if (!(!owner || owner === interaction.member.id)) return [3 /*break*/, 7];
-                        return [4 /*yield*/, SQLCounters_1["default"].getCounter(interacted.id)];
+                        counter = _a.sent();
+                        if (!!counter) return [3 /*break*/, 3];
+                        return [4 /*yield*/, interaction.reply({
+                                content: "Whoops, this counter is no longer valid",
+                                ephemeral: true
+                            })];
                     case 2:
-                        count = _d.sent();
-                        if (args[0] === "-1")
-                            count--;
-                        else
-                            count++;
-                        _b = (_a = interaction).reply;
-                        _c = {};
-                        return [4 /*yield*/, SQLCounters_1["default"].getContent(interacted.id)];
-                    case 3: return [4 /*yield*/, _b.apply(_a, [(_c.content = (_d.sent()) + ": " + count + "\n" + (owner ? "Only <@" + owner + "> can use this" :
-                                "Anyone can use this"),
-                                _c.components = [new Counter_1["default"]().getButtons()],
-                                _c.fetchReply = true,
-                                _c)])];
+                        _a.sent();
+                        return [2 /*return*/];
+                    case 3:
+                        if (!(!counter.owner || counter.owner === interaction.member.id)) return [3 /*break*/, 11];
+                        if (!(args[0] === "add")) return [3 /*break*/, 5];
+                        return [4 /*yield*/, counter.increment()];
                     case 4:
-                        message = _d.sent();
-                        return [4 /*yield*/, SQLCounters_1["default"].setCounter(interacted.id, message.id, count)];
-                    case 5:
-                        _d.sent();
-                        return [4 /*yield*/, interacted["delete"]()];
+                        _a.sent();
+                        return [3 /*break*/, 7];
+                    case 5: return [4 /*yield*/, counter.decrement()];
                     case 6:
-                        _d.sent();
-                        return [3 /*break*/, 9];
+                        _a.sent();
+                        _a.label = 7;
                     case 7: return [4 /*yield*/, interaction.reply({
+                            content: counter.toDiscordString(),
+                            components: [counter.getButtons()],
+                            fetchReply: true
+                        })];
+                    case 8:
+                        newMessage = _a.sent();
+                        counter.messageID = newMessage.id;
+                        return [4 /*yield*/, counter.save()];
+                    case 9:
+                        _a.sent();
+                        return [4 /*yield*/, interacted["delete"]()];
+                    case 10:
+                        _a.sent();
+                        return [3 /*break*/, 13];
+                    case 11: return [4 /*yield*/, interaction.reply({
                             content: "Whoops, you don't have access to this counter",
                             ephemeral: true
                         })];
-                    case 8:
-                        _d.sent();
-                        _d.label = 9;
-                    case 9: return [2 /*return*/];
+                    case 12:
+                        _a.sent();
+                        _a.label = 13;
+                    case 13: return [2 /*return*/];
                 }
             });
         });
@@ -112,4 +119,4 @@ var CounterButton = /** @class */ (function (_super) {
     return CounterButton;
 }(Buttons_1["default"]));
 exports["default"] = CounterButton;
-//# sourceMappingURL=Counter.js.map
+//# sourceMappingURL=CounterButton.js.map

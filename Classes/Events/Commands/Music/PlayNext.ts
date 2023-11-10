@@ -4,20 +4,17 @@ import {SlashCommandBuilder, SlashCommandStringOption} from "@discordjs/builders
 
 import {player} from "../../../../index";
 import Play, {addSong} from "./Play";
-import {APIMessage} from "discord-api-types";
-import {checkMusicChannel, checkVC} from "../../../Extras";
+import {checkVC} from "../../../Extras";
 import Queue from "../../../Music/Queue";
-import Track from "../../../Music/Track";
-import SQLMusicChannel from "../../../SQL/SQLMusicChannel";
 
 export default class PlayNext extends Commands {
 
     commandName: string = "play-next";
 
     async execute(interaction: CommandInteraction, args) {
-        if (!await checkMusicChannel(interaction.guild, interaction.channel.id))
-            return interaction.reply({content: "❌ | Sorry, please use this command in <#" +
-                    (await SQLMusicChannel.getMusicChannel(interaction.guild)).id + ">", ephemeral: true})
+        // if (!await checkMusicChannel(interaction.guild, interaction.channel.id))
+        //     return interaction.reply({content: "❌ | Sorry, please use this command in <#" +
+        //             (await SQLMusicChannel.getMusicChannel(interaction.guild)).id + ">", ephemeral: true})
         if (await checkVC(interaction)) return;
         let member: GuildMember = <GuildMember>interaction.member
         let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)

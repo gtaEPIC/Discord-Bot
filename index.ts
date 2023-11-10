@@ -1,22 +1,29 @@
-import {Client, Intents} from "discord.js";
+import {Client, IntentsBitField} from "discord.js";
 import OnReady from "./Classes/Events/OnReady";
 import GuildCreate from "./Classes/Events/GuildCreate";
 import InteractionCreated from "./Classes/Events/InteractionCreated";
 import Player from "./Classes/Music/Player";
-import SQLSetup from "./Classes/SQL/setup/SQLSetup";
-import {dbFile} from "./Classes/Extras";
+import setup from "./Classes/Events/database";
 
 require("dotenv").config();
 
 export const client = new Client({
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_VOICE_STATES
+        IntentsBitField.Flags.Guilds,
+        IntentsBitField.Flags.GuildMembers,
+        IntentsBitField.Flags.GuildModeration,
+        IntentsBitField.Flags.GuildMessages,
+        IntentsBitField.Flags.DirectMessages,
+        IntentsBitField.Flags.GuildMessageReactions,
+        IntentsBitField.Flags.GuildMessageTyping,
+        IntentsBitField.Flags.GuildPresences,
+        IntentsBitField.Flags.GuildVoiceStates,
+        IntentsBitField.Flags.GuildWebhooks,
     ]
 })
 
-SQLSetup(dbFile).then();
+// SQLSetup(dbFile).then();
+setup();
 
 export const player = new Player(client)
 
