@@ -29,7 +29,7 @@ export const player = new Player(client)
 
 player.on("onStart", (queue, track) => {
     track.makeAnnouncement().then();
-    track.updater = setInterval(() => track.makeAnnouncement().then(),2000, queue)
+    track.updater = setInterval(() => track.makeAnnouncement().then(),5000, queue)
 })
 player.on("onEmpty", queue => {
     queue.textChannel.send("🕳️ | Queue is empty. Use `/play` to add another song").then();
