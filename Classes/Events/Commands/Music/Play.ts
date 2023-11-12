@@ -56,7 +56,7 @@ export async function addSong(queue: Queue, query: string, member: GuildMember, 
         })
     }
 
-    queue.play(results);
+    queue.play(results, next);
 
     //if (!queue.playing || !queue.paused) await queue.resume();
 

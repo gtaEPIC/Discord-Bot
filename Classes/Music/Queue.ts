@@ -89,8 +89,9 @@ export default class Queue {
         else this.songs.splice(position, 0, track);
     }
 
-    play(track: Track) {
-        this.addTrack(track);
+    play(track: Track, playNext = false) {
+        if (playNext) this.addTrack(track, 0);
+        else this.addTrack(track);
         //if (this.paused) this.resume()
         if (!this.playing) this.next().then();
     }
