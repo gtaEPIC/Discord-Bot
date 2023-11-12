@@ -162,9 +162,9 @@ export default class Queue {
         if (this.history.length < 1) return false;
         if (this.playing) {
             this.playing.attempts = 0
-            this.addTrack(this.playing, 1);
+            this.addTrack(this.playing, 0);
         }
-        this.addTrack(this.history.shift(), 1)
+        this.addTrack(this.history.shift(), 0)
         this.playing?.onEnd()
         this.next().then();
         //this.skip();
