@@ -22,7 +22,7 @@ export async function addSong(queue: Queue, query: string, member: GuildMember, 
     if (results instanceof PlayList) {
         let embed: EmbedBuilder = new EmbedBuilder()
             .setTitle("Queued a Playlist")
-            .setDescription("Playlist: [" + results.name + "](https://www.youtube.com/playlist?list=" + results.id + ")\n" +
+            .setDescription("Playlist: [" + results.name + "](" + query + ")\n" +
                 "Tracks that were added:")
         let button: ButtonBuilder = new ButtonBuilder()
             .setLabel("Show Queue")

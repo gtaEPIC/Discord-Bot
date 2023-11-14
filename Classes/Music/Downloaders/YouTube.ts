@@ -1,4 +1,4 @@
-import ytdl = require("ytdl-core");
+import ytdl = require("@distube/ytdl-core");
 import Downloaders from "./Downloaders";
 import * as stream from "stream";
 

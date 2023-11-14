@@ -8,7 +8,7 @@ import {
     joinVoiceChannel,
     VoiceConnection
 } from "@discordjs/voice";
-import * as ytdl from "ytdl-core";
+import * as ytdl from "@distube/ytdl-core";
 import * as ytSearch from "yt-search";
 import * as ytlist from "youtube-search-api";
 import Player from "./Player";
@@ -42,6 +42,7 @@ export default class Queue {
     statedLoop: LoopModes;
     statedPause: boolean;
     skipping: boolean = false;
+    shuffling: boolean = false;
 
     constructor(player: Player, guild: Guild, voice: VoiceChannel | StageChannel, textChannel?: TextChannel) {
         this.player = player;
@@ -169,6 +170,35 @@ export default class Queue {
         this.next().then();
         //this.skip();
         return true;
+    }
+
+    shuffle(message?: Message) {
+        if (this.shuffling) throw new Error("Already shuffling!")
+        this.shuffling = true;
+        let total = this.songs.length;
+        let lastUpdate = 0;
+        let emojiState = false;
+        let newList = [];
+        for (let i = 0; i < total; i++) {
+            // Randomly pick an element to remove and add to the new list
+            let index = Math.floor(Math.random() * this.songs.length);
+            newList.push(this.songs[index]);
+            this.songs.splice(index, 1);
+            // Update the message every 5 seconds
+            if (lastUpdate + 5000 < Date.now()) {
+                let emoji = "⏳"
+                if (emojiState) emoji = "⌛"
+                emojiState = !emojiState
+                message?.edit({content: emoji + " | Shuffling the queue (" + (i + 1) + "/" + total + ")"})
+                lastUpdate = Date.now();
+            }
+        }
+        // If there are any songs left in the old list, add them to the new list
+        if (this.songs.length > 0) newList.concat(this.songs);
+        // Set the new list as the current list
+        this.songs = newList;
+        message?.edit({content: "🔀 | Finished shuffling the queue"})
+        this.shuffling = false;
     }
 
     getProgressBar(size: number, includeTimes: boolean): string {

@@ -29,6 +29,7 @@ import RollDice from "./Commands/Random/RollDice";
 import ReRoll from "./Buttons/Random/ReRoll";
 import CounterButton from "./Buttons/Random/CounterButton";
 import CounterCommand from "./Commands/Random/CounterCommand";
+import Shuffle from "./Commands/Music/Shuffle";
 
 export const commands: Array<Commands> = [
     new Play(),
@@ -43,6 +44,7 @@ export const commands: Array<Commands> = [
     new QueueCommand(),
     new HistoryCommand(),
     new ClearQueue(),
+    new Shuffle(),
     new RollDice(),
     new CounterCommand()
 ];
