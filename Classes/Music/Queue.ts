@@ -236,17 +236,26 @@ export default class Queue {
                             message?.edit({content: emoji + " | Adding songs to queue (" + count + "/" + response.items.length + ")"})
                             lastUpdate = Date.now();
                         }
-                        let details: ytdl.videoInfo = await ytdl.getInfo("https://www.youtube.com/watch?v=" + track.id)
-                        playlist.tracks.push(new Track(
-                            details.videoDetails.title,
-                            details.videoDetails.author.name,
-                            details.videoDetails.video_url,
-                            details.videoDetails.video_url,
-                            member,
-                            parseInt(details.videoDetails.lengthSeconds),
-                            "youtube",
-                            this
-                        ))
+                        try {
+                            let details: ytdl.videoInfo = await ytdl.getInfo("https://www.youtube.com/watch?v=" + track.id)
+                            playlist.tracks.push(new Track(
+                                details.videoDetails.title,
+                                details.videoDetails.author.name,
+                                details.videoDetails.video_url,
+                                details.videoDetails.video_url,
+                                member,
+                                parseInt(details.videoDetails.lengthSeconds),
+                                "youtube",
+                                this
+                            ))
+                        }catch (e) {
+                            console.error(e)
+                            if (message) {
+                                message.channel.send("❌ | An error occurred trying to add a song to the queue!\n" +
+                                    "Song: [" + track.title + "](https://youtube.com/watch?v=" + track.id + ")\n" +
+                                    "Reason: " + e.message)
+                            }
+                        }
                     }
                     return playlist
                 } else {
