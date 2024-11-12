@@ -17,7 +17,7 @@ export default class HistoryCommand extends Commands {
 
     commandName: string = "history";
 
-    getEmbed(interaction: Interaction): EmbedBuilder {
+    getEmbed(interaction: Interaction, args): EmbedBuilder {
         let member: GuildMember = <GuildMember>interaction.member
         let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
         let track: Track = queue.playing;
@@ -26,7 +26,13 @@ export default class HistoryCommand extends Commands {
             .setDescription((track) ? "Currently Playing **" + track.name + "**\nHistory:" : "Nothing is playing right now. Last tracks played:");
         //console.log(min, max, page)
         console.log(queue.history);
-        for (let i = 0; i < queue.history.length; i++) {
+        let page: number = args["page"];
+        if (!page || page < 1) page = 1;
+        let min: number = (page - 1) * 5;
+        if (min > queue.history.length) min -= 5;
+        let max: number = page * 5;
+        if (max > queue.history.length) max = queue.history.length;
+        for (let i = min; i < max; i++) {
             let song: Track = queue.history[i];
             embed.addFields({
                 name: (i + 1) + ". " + song.name + " `(" + secondsToTime(song.duration) + ")`",
@@ -44,17 +50,40 @@ export default class HistoryCommand extends Commands {
 
             })
         }
+        let totalPages = Math.floor(queue.history.length / 5) + 1;
+        embed.setFooter({
+            text: "Page " + page + "/" + totalPages
+        })
         return embed;
     }
 
-    async execute(interaction: CommandInteraction) {
-        //if (await checkVC(interaction)) return;
-        let embed: EmbedBuilder = this.getEmbed(<Interaction>interaction);
+    getButtons(interaction: Interaction, args) {
+        let member: GuildMember = <GuildMember>interaction.member
+        let queue: Queue = player.createQueue(interaction.guild, member.voice.channel, <TextChannel>interaction.channel)
+        let totalPages = Math.floor(queue.history.length / 5) + 1;
+        let page: number = args["page"];
+        if (!page || page < 1) page = 1;
+        let previousButton: ButtonBuilder = new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary)
+            .setLabel("⬅ | Previous Page")
+            .setCustomId("history+=+" + (page - 1))
+            .setDisabled(page === 1);
         let refreshButton: ButtonBuilder = new ButtonBuilder()
             .setStyle(ButtonStyle.Primary)
             .setLabel("🔄 | Refresh")
-            .setCustomId("history");
-        let actionRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder<ButtonBuilder>({components: [refreshButton]})
+            .setCustomId("history+=+" + page);
+        let nextButton: ButtonBuilder = new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary)
+            .setLabel("➡ | Next Page")
+            .setCustomId("history+=+" + (page + 1))
+            .setDisabled(page >= totalPages);
+        return new ActionRowBuilder<ButtonBuilder>({components: [previousButton, refreshButton, nextButton]})
+    }
+
+    async execute(interaction: CommandInteraction, args) {
+        //if (await checkVC(interaction)) return;
+        let embed: EmbedBuilder = this.getEmbed(<Interaction>interaction, args);
+        let actionRow: ActionRowBuilder<ButtonBuilder> = this.getButtons(<Interaction>interaction, args)
         await interaction.reply({
             embeds: [embed],
             components: [actionRow]
