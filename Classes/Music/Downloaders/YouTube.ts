@@ -10,6 +10,11 @@ export default class YouTube extends Downloaders{
             begin: point,
             highWaterMark: 1<<25,
             liveBuffer: 40000,
+            requestOptions: {
+                headers: {
+                    cookie: process.env.YTDL_COOKIE || ""
+                }
+            }
         })
     }
 }
