@@ -1,4 +1,8 @@
-import {Interaction} from "discord.js";
+import {
+    ButtonInteraction,
+    ChatInputCommandInteraction,
+    SelectMenuInteraction
+} from "discord.js";
 import Commands from "./Commands/Commands";
 import Play from "./Commands/Music/Play";
 import PlayNext from "./Commands/Music/PlayNext";
@@ -66,11 +70,12 @@ export const selectMenus: Array<SelectMenu> = [
     new LoopMenu()
 ]
 
-export default function (interaction: Interaction) {
+export default function (interaction: ChatInputCommandInteraction | ButtonInteraction | SelectMenuInteraction) {
 
     if (interaction.isCommand()) {
         const args = {}
-        let options = interaction.options.data
+        let CI: ChatInputCommandInteraction = <ChatInputCommandInteraction>interaction;
+        let options = CI.options.data
         if (options.length > 0) {
             for (let option of options) {
                 args[option.name] = option.value

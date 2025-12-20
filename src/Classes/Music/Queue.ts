@@ -9,7 +9,7 @@ import {
     VoiceConnection
 } from "@discordjs/voice";
 import * as ytdl from "@distube/ytdl-core";
-import * as ytSearch from "yt-search";
+import ytSearch from "yt-search";
 import * as ytlist from "youtube-search-api";
 import Player from "./Player";
 import {secondsToTime} from "../Extras";
@@ -281,7 +281,8 @@ export default class Queue {
                         }catch (e) {
                             console.error(e)
                             if (message) {
-                                message.channel.send("❌ | An error occurred trying to add a song to the queue!\n" +
+                                let channel: TextChannel = <TextChannel>message.channel;
+                                await channel.send("❌ | An error occurred trying to add a song to the queue!\n" +
                                     "Song: [" + track.title + "](https://youtube.com/watch?v=" + track.id + ")\n" +
                                     "Reason: " + e.message)
                             }

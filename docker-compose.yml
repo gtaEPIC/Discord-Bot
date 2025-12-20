@@ -1,0 +1,10 @@
+services:
+  epic-music:
+    build:
+      context: .
+    environment:
+      - BOT=${BOT}
+      - CLIENT_ID=${CLIENT_ID}
+      - SECRET=${SECRET}
+      - MONGO_URL=${MONGO_URL}
+      - YTDL_COOKIE=${YTDL_COOKIE}

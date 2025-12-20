@@ -7,8 +7,8 @@ import {
 import {AudioResource, createAudioPlayer, createAudioResource} from "@discordjs/voice";
 import * as stream from "stream";
 import Queue, {LoopModes} from "./Queue";
-import YouTube from "./Downloaders/YouTube";
-import SoundCloud from "./Downloaders/SoundCloud";
+import YouTube from "../Downloaders/YouTube";
+import SoundCloud from "../Downloaders/SoundCloud";
 
 export default class Track {
     name: string;
