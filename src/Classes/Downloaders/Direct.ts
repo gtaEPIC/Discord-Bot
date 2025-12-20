@@ -1,11 +1,11 @@
 import Downloaders from "./Downloaders";
 import * as stream from "stream";
-import * as fs from "fs";
+// import * as fs from "fs";
 
 export default class Direct extends Downloaders {
     download(url, point): Promise<stream.Readable> {
         // Download the file using axios
-        return new Promise((resolve, reject) => {
+        return new Promise(() => {
 
 
         });
